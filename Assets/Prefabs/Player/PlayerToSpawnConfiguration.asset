@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e707ff71f85934506a7cca6431927982, type: 3}
+  m_Name: PlayerToSpawnConfiguration
+  m_EditorClassIdentifier: 
+  _playerID: {fileID: 11400000, guid: e97b7c27b098b4934ba8041ef7508856, type: 2}
+  _torque: 10
+  _position: {x: 0, y: 1, z: 0}
+  _rotation: {x: 0, y: 0, z: 0, w: 0}

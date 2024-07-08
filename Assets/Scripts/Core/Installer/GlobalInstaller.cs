@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Common.Commands;
+using Maze.Runtime.Commands;
 using Core.DataStorage;
 using Core.Serializers;
 using Patterns.Behaviour.Command;

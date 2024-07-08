@@ -3,7 +3,7 @@ using Patterns.Behaviour.Command;
 using Maze.Runtime.UI;
 using UnityEngine.SceneManagement;
 
-namespace Common.Commands
+namespace Maze.Runtime.Commands
 {
     public class LoadSceneCommand : Command
     {

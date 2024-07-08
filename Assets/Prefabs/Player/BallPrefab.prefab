@@ -13,10 +13,12 @@ GameObject:
   - component: {fileID: 13582488}
   - component: {fileID: 2308226}
   - component: {fileID: 5492230}
-  - component: {fileID: 11471494}
+  - component: {fileID: 171048882463111972}
+  - component: {fileID: 7127148175327397088}
+  - component: {fileID: 3660420422517915888}
   m_Layer: 0
   m_Name: BallPrefab
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -134,7 +136,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &11471494
+--- !u!114 &171048882463111972
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,10 +145,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 130820}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48a3aea66c80209468a4c613fe0c6ccb, type: 3}
+  m_Script: {fileID: 11500000, guid: a195b2c3efa1f4f40a371b2b7175a798, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ViewCamera: {fileID: 0}
-  JumpSound: {fileID: 0}
-  HitSound: {fileID: 0}
-  CoinSound: {fileID: 0}
+  _movementController: {fileID: 7127148175327397088}
+  _playerId: {fileID: 11400000, guid: e97b7c27b098b4934ba8041ef7508856, type: 2}
+--- !u!114 &7127148175327397088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17db263380ce542689e4812ea6fef5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3660420422517915888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ed5d7af84f584af6af372f4e12a967b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

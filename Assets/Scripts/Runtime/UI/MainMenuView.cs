@@ -1,4 +1,4 @@
-using Common.Commands;
+using Maze.Runtime.Commands;
 using Patterns.Behaviour.Command;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,13 +14,13 @@ namespace Maze.Runtime.UI
         private void Start()
         {
             _startGameButton.onClick.AddListener(OnStartButtonPressed);
-            _loadGameButton.onClick.AddListener(OnLoadButtonPressed);
+            //_loadGameButton.onClick.AddListener(OnLoadButtonPressed);
             _quitButton.onClick.AddListener(OnQuitButtonPressed);
         }
 
         private void OnStartButtonPressed()
         {
-            var loadGameSceneCommand = new LoadGameSceneCommand();
+            LoadGameSceneCommand loadGameSceneCommand = new LoadGameSceneCommand();
 
             ServiceLocator.Instance.GetService<CommandQueue>()
                           .AddCommand(loadGameSceneCommand);
@@ -28,7 +28,7 @@ namespace Maze.Runtime.UI
 
         private void OnLoadButtonPressed()
         {
-            var loadGameSceneCommand = new LoadGameSceneCommand();
+            LoadGameSceneCommand loadGameSceneCommand = new LoadGameSceneCommand();
 
             ServiceLocator.Instance.GetService<CommandQueue>()
                           .AddCommand(loadGameSceneCommand);
