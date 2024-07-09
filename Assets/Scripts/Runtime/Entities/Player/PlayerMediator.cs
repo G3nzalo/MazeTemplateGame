@@ -15,10 +15,11 @@ public class PlayerMediator : MonoBehaviour , EventObserver , IPlayer
     [SerializeField] private PlayerID _playerId;
 
     public string Id => _playerId.Value;
+    public void LeavePlayer() => Release();
 
     public void Process(EventData eventData)
     {
-        throw new System.NotImplementedException();
+
     }
 
     private void Init()
@@ -39,7 +40,7 @@ public class PlayerMediator : MonoBehaviour , EventObserver , IPlayer
         _movementController.Configure(this, configuration.Torque);
 
         ViewCamera = GameObject.FindWithTag("MainCamera");
-
+        Init();
     }
 
     private void FixedUpdate()

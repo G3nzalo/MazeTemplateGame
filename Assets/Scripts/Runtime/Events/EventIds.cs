@@ -1,5 +1,6 @@
 public enum EventIds
 {
     InitGame,
-    Victory
+    Victory,
+    Restart
 }

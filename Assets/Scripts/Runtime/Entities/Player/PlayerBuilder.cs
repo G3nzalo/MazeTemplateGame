@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
-public class PlayerBuilder : MonoBehaviour
+public class PlayerBuilder
 {
     public enum InputMode
     {

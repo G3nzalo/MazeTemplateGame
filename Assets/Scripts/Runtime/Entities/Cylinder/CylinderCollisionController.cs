@@ -15,7 +15,9 @@ public class CylinderCollisionController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("Player"))
         {
-
+            var eventData = new EventData(EventIds.Victory);
+            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+            eventQueue.EnqueueEvent(eventData);
         }
 
     }

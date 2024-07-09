@@ -7,8 +7,6 @@ public class PlayingState : GameState, EventObserver
 {
     private Action<GameStateController.GameStates> _onEndedCallback;
 
-
-
     public void Start(Action<GameStateController.GameStates> onEndedCallback)
     {
         _onEndedCallback = onEndedCallback;
