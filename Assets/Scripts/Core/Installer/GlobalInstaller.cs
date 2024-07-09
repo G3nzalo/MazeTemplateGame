@@ -19,11 +19,6 @@ namespace Core.Installers
         protected override void DoInstallDependencies()
         {
             ServiceLocator.Instance.RegisterService(CommandQueue.Instance);
-
-            var serializer = new JsonUtilityAdapter();
-            var dataStore = new PlayerPrefsDataStoreAdapter(serializer);
-            //var scoreSystemImpl = new ScoreSystemImpl(dataStore);
-            //ServiceLocator.Instance.RegisterService<ScoreSystem>(scoreSystemImpl);
         }
     }
 }

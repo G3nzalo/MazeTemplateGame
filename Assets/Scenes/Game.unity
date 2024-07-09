@@ -241,6 +241,50 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d76f2b19d6fd4b4c8ae3522b827d4a9, type: 3}
+--- !u!1 &611368538
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 611368540}
+  - component: {fileID: 611368539}
+  m_Layer: 0
+  m_Name: GameFacade
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &611368539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611368538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29d7f35b567f049009a56e0e53778f41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &611368540
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611368538}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 861.5804, y: 857.75433, z: -0.3678419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1441,6 +1485,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1545113719}
     m_Modifications:
     - target: {fileID: 159224906053076403, guid: ab38a74a85aaf41c48f450d1e61006dc, type: 3}
+      propertyPath: _gameFacade
+      value: 
+      objectReference: {fileID: 611368539}
+    - target: {fileID: 159224906053076403, guid: ab38a74a85aaf41c48f450d1e61006dc, type: 3}
       propertyPath: _victoryView
       value: 
       objectReference: {fileID: 2129990253587775063}
@@ -1569,5 +1617,6 @@ SceneRoots:
   - {fileID: 2601343228738648529}
   - {fileID: 777061884}
   - {fileID: 1137253207}
-  - {fileID: 1006985238}
   - {fileID: 972303419}
+  - {fileID: 611368540}
+  - {fileID: 1006985238}

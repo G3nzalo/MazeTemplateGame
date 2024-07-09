@@ -6,16 +6,9 @@ namespace Core.DataStorage
 {
     public class PlayerPrefsDataStoreAdapter : DataStore
     {
-        private readonly Serializer _serializer;
-
-        public PlayerPrefsDataStoreAdapter(Serializer serializer)
-        {
-            _serializer = serializer;
-        }
-
         public void SetData<T>(T data, string name)
         {
-            var json = _serializer.ToJson(data);
+            var json = JsonUtility.ToJson(data);
             PlayerPrefs.SetString(name, json);
             PlayerPrefs.Save();
         }
@@ -23,7 +16,7 @@ namespace Core.DataStorage
         public T GetData<T>(string name)
         {
             var json = PlayerPrefs.GetString(name);
-            return _serializer.FromJson<T>(json);
+            return JsonUtility.FromJson<T>(json);
         }
     }
 }

@@ -24,6 +24,12 @@ public class ScoreView : MonoBehaviour
         _scoreTxt.text = currentScore;
     }
 
+    public void ReloadScoreFromDB()
+    {
+        string currentScore = ScoreSystem.Instance.GetScore;
+        _scoreTxt.text = currentScore;
+    }
+
     public void ResetScore()
     {
         _scoreTxt.text = ScoreSystem.Instance.OnResetScore();

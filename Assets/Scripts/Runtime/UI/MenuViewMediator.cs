@@ -12,7 +12,7 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
     [SerializeField] private Timer _timer;
     [SerializeField] private ScoreView _scoreViewAmount;
     [SerializeField] private TextMeshProUGUI _scoreTxt;
-
+    [SerializeField] private GameFacade _gameFacade;
 
     public Button PauseButton => _pauseButton;
     private CommandQueue _commandQueue;
@@ -24,7 +24,7 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         _victoryView.Configure(this);
     }
 
-    void Start()
+    private void Start()
     {
         _commandQueue = ServiceLocator.Instance.GetService<CommandQueue>();
 
@@ -110,6 +110,19 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         ResumeGame();
     }
 
+    public void OnSaveGame()
+    {
+        _gameFacade.Save();
+        OnResumeButton();
+    }
+
+    public void OnLoadGame()
+    {
+        _gameFacade.Load();
+        OnResumeButton();
+        _scoreViewAmount.ReloadScoreFromDB();
+    }
+
     private void ResumeGame()
     {
         _commandQueue.AddCommand(new ResumeGameCommand());
@@ -137,5 +150,4 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
             return;
         }
     }
-
 }

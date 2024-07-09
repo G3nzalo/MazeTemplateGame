@@ -6,8 +6,10 @@ public class ScoreSystem : MonoSingleton<ScoreSystem>
 
     int _score = 0;
 
+    public int GetScoreToStorage => _score;
     public string GetScore => _score.ToString();
 
+    public void ReloadScoreFromDB(int scoreSaved) => SetScoreFromDb(scoreSaved);
     public void OnCollectedCoin() => AddScore();
     public string OnResetScore() => ResetScore();
 
@@ -22,4 +24,8 @@ public class ScoreSystem : MonoSingleton<ScoreSystem>
         return _score.ToString();
     }
 
+    private void SetScoreFromDb(int scoreSaved)
+    {
+        _score = scoreSaved;
+    }
 }

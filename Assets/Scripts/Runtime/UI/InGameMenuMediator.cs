@@ -5,4 +5,6 @@ public interface InGameMenuMediator
     void OnResumeButton();
     void OnQuitGame();
     void OnHideTimer();
+    void OnSaveGame();
+    void OnLoadGame();
 }

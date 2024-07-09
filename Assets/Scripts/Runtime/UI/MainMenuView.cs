@@ -8,7 +8,6 @@ namespace Maze.Runtime.UI
     public class MainMenuView : MonoBehaviour
     {
         [SerializeField] private Button _startGameButton;
-        [SerializeField] private Button _loadGameButton;
         [SerializeField] private Button _quitButton;
 
         private void Start()
@@ -25,17 +24,6 @@ namespace Maze.Runtime.UI
             ServiceLocator.Instance.GetService<CommandQueue>()
                           .AddCommand(loadGameSceneCommand);
         }
-
-        private void OnLoadButtonPressed()
-        {
-            _loadGameButton.onClick.RemoveAllListeners();
-
-            LoadGameSceneCommand loadGameSceneCommand = new LoadGameSceneCommand();
-
-            ServiceLocator.Instance.GetService<CommandQueue>()
-                          .AddCommand(loadGameSceneCommand);
-        }
-
 
         private void OnQuitButtonPressed()
         {
