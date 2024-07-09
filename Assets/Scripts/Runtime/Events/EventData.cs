@@ -1,13 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-public class EventData
+namespace Maze.Runtime.Events
 {
-    public readonly EventIds EventId;
-
-    public EventData(EventIds eventId)
+    public class EventData
     {
-        EventId = eventId;
+        public readonly EventIds EventId;
+
+        public EventData(EventIds eventId)
+        {
+            EventId = eventId;
+        }
     }
+
 }

@@ -1,7 +1,10 @@
-﻿public class PlayerFactory
+﻿namespace Maze.Runtime.Entities
 {
-    public PlayerBuilder Create()
+    public class PlayerFactory
     {
-        return new PlayerBuilder();
+        public PlayerBuilder Create()
+        {
+            return new PlayerBuilder();
+        }
     }
 }

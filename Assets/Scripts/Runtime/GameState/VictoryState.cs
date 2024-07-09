@@ -1,25 +1,30 @@
 using System;
+using Maze.Runtime.Entities;
 using Patterns.Behaviour.Command;
 
-public class VictoryState : GameState
+namespace Maze.Runtime.GameStates
 {
-    private readonly Command _stopGame;
-
-    public VictoryState(Command finishGame)
+    public class VictoryState : GameState
     {
-        _stopGame = finishGame;
-    }
+        private readonly Command _stopGame;
 
-    public void Start(Action<GameStateController.GameStates> onEndedCallback)
-    {
-        ServiceLocator.Instance.GetService<CommandQueue>()
-                      .AddCommand(_stopGame);
-    }
+        public VictoryState(Command finishGame)
+        {
+            _stopGame = finishGame;
+        }
 
-    public void Stop()
-    {
-        var playerMediator = ServiceLocator.Instance.GetService<PlayerMediator>();
-        playerMediator.LeavePlayer();
+        public void Start(Action<GameStateController.GameStates> onEndedCallback)
+        {
+            ServiceLocator.Instance.GetService<CommandQueue>()
+                          .AddCommand(_stopGame);
+        }
+
+        public void Stop()
+        {
+            var playerMediator = ServiceLocator.Instance.GetService<PlayerMediator>();
+            playerMediator.LeavePlayer();
+        }
+
     }
 
 }

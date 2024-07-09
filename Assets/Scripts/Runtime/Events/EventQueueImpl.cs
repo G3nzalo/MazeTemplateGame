@@ -1,108 +1,110 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EventQueueImpl : MonoBehaviour, EventQueue
+namespace Maze.Runtime.Events
 {
-    private class RemoveData
+    public class EventQueueImpl : MonoBehaviour, EventQueue
     {
-        public EventIds EventId;
-        public EventObserver EventObserver;
-
-        public RemoveData(EventIds eventId, EventObserver eventObserver)
+        private class RemoveData
         {
-            EventId = eventId;
-            EventObserver = eventObserver;
-        }
-    }
+            public EventIds EventId;
+            public EventObserver EventObserver;
 
-    private List<RemoveData> _observersToUnsubscribe;
-    private Queue<EventData> _currentEvents;
-    private Queue<EventData> _nextEvents;
-
-    private Dictionary<EventIds, List<EventObserver>> _observers;
-    private bool _isProcessingEvents;
-
-    private void Awake()
-    {
-        _observersToUnsubscribe = new List<RemoveData>();
-        _currentEvents = new Queue<EventData>();
-        _nextEvents = new Queue<EventData>();
-        _observers = new Dictionary<EventIds, List<EventObserver>>();
-    }
-
-    public void Subscribe(EventIds eventId, EventObserver eventObserver)
-    {
-        if (!_observers.TryGetValue(eventId, out var eventObservers))
-        {
-            eventObservers = new List<EventObserver>();
-        }
-
-        eventObservers.Add(eventObserver);
-        _observers[eventId] = eventObservers;
-    }
-
-    public void Unsubscribe(EventIds eventId, EventObserver eventObserver)
-    {
-        if (_isProcessingEvents)
-        {
-            var removeData = new RemoveData(eventId, eventObserver);
-            _observersToUnsubscribe.Add(removeData);
-            return;
-        }
-
-        DoUnsubscribe(eventId, eventObserver);
-    }
-
-    private void DoUnsubscribe(EventIds eventId, EventObserver eventObserver)
-    {
-        _observers[eventId].Remove(eventObserver);
-    }
-
-    public void EnqueueEvent(EventData eventData)
-    {
-        _nextEvents.Enqueue(eventData);
-    }
-
-    private void LateUpdate()
-    {
-        ProcessEvents();
-    }
-
-    private void ProcessEvents()
-    {
-        var tempCurrentEvents = _currentEvents;
-        _currentEvents = _nextEvents;
-        _nextEvents = tempCurrentEvents;
-
-        foreach (var currentEvent in _currentEvents)
-        {
-            ProcessEvent(currentEvent);
-        }
-
-        _currentEvents.Clear();
-    }
-
-    private void ProcessEvent(EventData eventData)
-    {
-        _isProcessingEvents = true;
-        if (_observers.TryGetValue(eventData.EventId, out var eventObservers))
-        {
-            foreach (var eventObserver in eventObservers)
+            public RemoveData(EventIds eventId, EventObserver eventObserver)
             {
-                eventObserver.Process(eventData);
+                EventId = eventId;
+                EventObserver = eventObserver;
             }
         }
-        _isProcessingEvents = false;
 
-        UnsubscribePendingObservers();
-    }
+        private List<RemoveData> _observersToUnsubscribe;
+        private Queue<EventData> _currentEvents;
+        private Queue<EventData> _nextEvents;
 
-    private void UnsubscribePendingObservers()
-    {
-        foreach (var removeData in _observersToUnsubscribe)
+        private Dictionary<EventIds, List<EventObserver>> _observers;
+        private bool _isProcessingEvents;
+
+        private void Awake()
         {
-            DoUnsubscribe(removeData.EventId, removeData.EventObserver);
+            _observersToUnsubscribe = new List<RemoveData>();
+            _currentEvents = new Queue<EventData>();
+            _nextEvents = new Queue<EventData>();
+            _observers = new Dictionary<EventIds, List<EventObserver>>();
+        }
+
+        public void Subscribe(EventIds eventId, EventObserver eventObserver)
+        {
+            if (!_observers.TryGetValue(eventId, out var eventObservers))
+            {
+                eventObservers = new List<EventObserver>();
+            }
+
+            eventObservers.Add(eventObserver);
+            _observers[eventId] = eventObservers;
+        }
+
+        public void Unsubscribe(EventIds eventId, EventObserver eventObserver)
+        {
+            if (_isProcessingEvents)
+            {
+                var removeData = new RemoveData(eventId, eventObserver);
+                _observersToUnsubscribe.Add(removeData);
+                return;
+            }
+
+            DoUnsubscribe(eventId, eventObserver);
+        }
+
+        private void DoUnsubscribe(EventIds eventId, EventObserver eventObserver)
+        {
+            _observers[eventId].Remove(eventObserver);
+        }
+
+        public void EnqueueEvent(EventData eventData)
+        {
+            _nextEvents.Enqueue(eventData);
+        }
+
+        private void LateUpdate()
+        {
+            ProcessEvents();
+        }
+
+        private void ProcessEvents()
+        {
+            var tempCurrentEvents = _currentEvents;
+            _currentEvents = _nextEvents;
+            _nextEvents = tempCurrentEvents;
+
+            foreach (var currentEvent in _currentEvents)
+            {
+                ProcessEvent(currentEvent);
+            }
+
+            _currentEvents.Clear();
+        }
+
+        private void ProcessEvent(EventData eventData)
+        {
+            _isProcessingEvents = true;
+            if (_observers.TryGetValue(eventData.EventId, out var eventObservers))
+            {
+                foreach (var eventObserver in eventObservers)
+                {
+                    eventObserver.Process(eventData);
+                }
+            }
+            _isProcessingEvents = false;
+
+            UnsubscribePendingObservers();
+        }
+
+        private void UnsubscribePendingObservers()
+        {
+            foreach (var removeData in _observersToUnsubscribe)
+            {
+                DoUnsubscribe(removeData.EventId, removeData.EventObserver);
+            }
         }
     }
 }

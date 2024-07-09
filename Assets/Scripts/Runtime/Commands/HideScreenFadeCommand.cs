@@ -1,4 +1,5 @@
-﻿using Patterns.Behaviour.Command;
+﻿using Maze.Runtime.UI;
+using Patterns.Behaviour.Command;
 using System.Threading.Tasks;
 
 namespace Maze.Runtime.Commands

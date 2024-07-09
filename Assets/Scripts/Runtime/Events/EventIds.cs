@@ -1,8 +1,11 @@
-public enum EventIds
+namespace Maze.Runtime.Events
 {
-    InitGame,
-    Victory,
-    Restart,
-    CollectedCoin,
-    SaveGame
+    public enum EventIds
+    {
+        InitGame,
+        Victory,
+        Restart,
+        CollectedCoin,
+        SaveGame
+    }
 }

@@ -1,34 +1,38 @@
-using System.Numerics;
+using Maze.Runtime.Entities;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
-public class CameraMovement : MonoBehaviour
+namespace Maze.Tools
 {
-    [SerializeField] private PlayerMediator player;
-
-    void FixedUpdate()
+    public class CameraMovement : MonoBehaviour
     {
-        MoveCamera();
-    }
+        [SerializeField] private PlayerMediator player;
 
-    private void MoveCamera()
-    {
-        if (player != null)
+        void FixedUpdate()
         {
-            Vector3 direction = (Vector3.up * 2 + Vector3.back) * 2;
-            RaycastHit hit;
-            Debug.DrawLine(player.transform.position, player.transform.position + direction, Color.red);
+            MoveCamera();
+        }
 
-            if (Physics.Linecast(transform.position, transform.position + direction, out hit))
+        private void MoveCamera()
+        {
+            if (player != null)
             {
-                transform.position = hit.point;
-            }
-            else
-            {
-                transform.position = transform.position + direction;
-            }
+                Vector3 direction = (Vector3.up * 2 + Vector3.back) * 2;
+                RaycastHit hit;
+                Debug.DrawLine(player.transform.position, player.transform.position + direction, Color.red);
 
-            transform.LookAt(player.transform.position);
+                if (Physics.Linecast(transform.position, transform.position + direction, out hit))
+                {
+                    transform.position = hit.point;
+                }
+                else
+                {
+                    transform.position = transform.position + direction;
+                }
+
+                transform.LookAt(player.transform.position);
+            }
         }
     }
+
 }

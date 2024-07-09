@@ -1,16 +1,20 @@
 ﻿using System;
 
-[Serializable]
-public class SaveData
+namespace Maze.Runtime.GameData
 {
-    public UnityEngine.Vector3 PlayerPosition;
-    public UnityEngine.Quaternion PlayerRotation;
-    public int Score;
-
-    public SaveData(UnityEngine.Vector3 playerPosition , UnityEngine.Quaternion playerRotation , int score)
+    [Serializable]
+    public class SaveData
     {
-        PlayerPosition = playerPosition;
-        PlayerRotation = playerRotation;
-        Score = score;
+        public UnityEngine.Vector3 PlayerPosition;
+        public UnityEngine.Quaternion PlayerRotation;
+        public int Score;
+
+        public SaveData(UnityEngine.Vector3 playerPosition, UnityEngine.Quaternion playerRotation, int score)
+        {
+            PlayerPosition = playerPosition;
+            PlayerRotation = playerRotation;
+            Score = score;
+        }
     }
 }
+

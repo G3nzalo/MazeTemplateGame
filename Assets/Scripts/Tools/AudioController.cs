@@ -4,155 +4,159 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
-public class AudioController : MonoSingleton<AudioController> , IAudioManager
+namespace Maze.Tools
 {
-    [SerializeField] private AudioMixer mixer;
-    [SerializeField] private List<SoundEntry> soundsSources;
-    [SerializeField] private float musicStandardDB;
-
-    private Dictionary<string, AudioSource> soundsDictionary = new Dictionary<string, AudioSource>();
-
-    protected override void Awake()
+    public class AudioController : MonoSingleton<AudioController>, IAudioManager
     {
-        base.Awake();
-        foreach (var sound in soundsSources)
+        [SerializeField] private AudioMixer mixer;
+        [SerializeField] private List<SoundEntry> soundsSources;
+        [SerializeField] private float musicStandardDB;
+
+        private Dictionary<string, AudioSource> soundsDictionary = new Dictionary<string, AudioSource>();
+
+        protected override void Awake()
         {
-            soundsDictionary.Add(sound.name, sound.source);
-        }
-    }
-
-    private void Start()
-    {
-        PlaySound("SoundTrackGame");
-    }
-
-    public float GetMuiscVolume()
-    {
-        float volume = 0;
-        mixer.GetFloat("MusicVolume", out volume);
-        return volume;
-    }
-
-    public float GetSfxVolume()
-    {
-        float volume = 0;
-        mixer.GetFloat("SoundEffectsVolume", out volume);
-        return volume;
-    }
-
-    public void PlaySound(string soundId)
-    {
-        if (!soundsDictionary.ContainsKey(soundId))
-        {
-            Debug.LogError("Sound with id " + soundId + " not found");
-            return;
-        }
-
-        if (soundsDictionary[soundId].isPlaying)
-        {
-            StartCoroutine(FadeOut(soundsDictionary[soundId], 1));
-            return;
-        }
-
-        PlayNextSound(soundsDictionary[soundId]);
-    }
-
-    public void SetMusicVolume(float volume, bool valueOnDb = false)
-    {
-        float dB = 0;
-        if (!valueOnDb)
-        {
-            if (volume != 0)
+            base.Awake();
+            foreach (var sound in soundsSources)
             {
-                dB = 20.0f * Mathf.Log10(volume);
+                soundsDictionary.Add(sound.name, sound.source);
+            }
+        }
+
+        private void Start()
+        {
+            PlaySound("SoundTrackGame");
+        }
+
+        public float GetMuiscVolume()
+        {
+            float volume = 0;
+            mixer.GetFloat("MusicVolume", out volume);
+            return volume;
+        }
+
+        public float GetSfxVolume()
+        {
+            float volume = 0;
+            mixer.GetFloat("SoundEffectsVolume", out volume);
+            return volume;
+        }
+
+        public void PlaySound(string soundId)
+        {
+            if (!soundsDictionary.ContainsKey(soundId))
+            {
+                Debug.LogError("Sound with id " + soundId + " not found");
+                return;
+            }
+
+            if (soundsDictionary[soundId].isPlaying)
+            {
+                StartCoroutine(FadeOut(soundsDictionary[soundId], 1));
+                return;
+            }
+
+            PlayNextSound(soundsDictionary[soundId]);
+        }
+
+        public void SetMusicVolume(float volume, bool valueOnDb = false)
+        {
+            float dB = 0;
+            if (!valueOnDb)
+            {
+                if (volume != 0)
+                {
+                    dB = 20.0f * Mathf.Log10(volume);
+                }
+                else
+                {
+                    dB = -144.0f;
+                }
             }
             else
             {
-                dB = -144.0f;
+                dB = volume;
             }
+            mixer.SetFloat("MusicVolume", dB);
         }
-        else
+
+        public void SetPitch(float pitchValue)
         {
-            dB = volume;
+            mixer.SetFloat("PitchParameter", pitchValue);
         }
-        mixer.SetFloat("MusicVolume", dB);
-    }
 
-    public void SetPitch(float pitchValue)
-    {
-        mixer.SetFloat("PitchParameter", pitchValue);
-    }
-
-    public void SetRandomPitch()
-    {
-        float randomPitch = UnityEngine.Random.Range(0.5f, 2.0f);
-        SetPitch(randomPitch);
-    }
-
-    public void SetSoundsEffectsVolume(float volume, bool valueOnDb = false)
-    {
-        float dB = 0;
-        if (!valueOnDb)
+        public void SetRandomPitch()
         {
-            if (volume != 0)
+            float randomPitch = UnityEngine.Random.Range(0.5f, 2.0f);
+            SetPitch(randomPitch);
+        }
+
+        public void SetSoundsEffectsVolume(float volume, bool valueOnDb = false)
+        {
+            float dB = 0;
+            if (!valueOnDb)
             {
-                dB = 20.0f * Mathf.Log10(volume);
+                if (volume != 0)
+                {
+                    dB = 20.0f * Mathf.Log10(volume);
+                }
+                else
+                {
+                    dB = -144.0f;
+                }
             }
             else
             {
-                dB = -144.0f;
+                dB = volume;
             }
+            mixer.SetFloat("SoundEffectsVolume", dB);
         }
-        else
+
+        private void PlayNextSound(AudioSource currentSource)
         {
-            dB = volume;
+            StartCoroutine(FadeIn(currentSource));
         }
-        mixer.SetFloat("SoundEffectsVolume", dB);
-    }
 
-    private void PlayNextSound(AudioSource currentSource)
-    {
-        StartCoroutine(FadeIn(currentSource));
-    }
-
-    private IEnumerator FadeIn(AudioSource audioSource, float fadeDuration = 1)
-    {
-        audioSource.volume = 0f;
-        audioSource.Play();
-        float timer = 0f;
-
-        while (timer < fadeDuration)
+        private IEnumerator FadeIn(AudioSource audioSource, float fadeDuration = 1)
         {
-            timer += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(0f, musicStandardDB, timer / fadeDuration);
-            yield return null;
+            audioSource.volume = 0f;
+            audioSource.Play();
+            float timer = 0f;
+
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(0f, musicStandardDB, timer / fadeDuration);
+                yield return null;
+            }
+
+            audioSource.volume = musicStandardDB;
         }
 
-        audioSource.volume = musicStandardDB;
-    }
 
-
-    private IEnumerator FadeOut(AudioSource audioSource, float fadeDuration = 1)
-    {
-        float startVolume = GetMuiscVolume();
-
-        float timer = 0f;
-
-        while (timer < fadeDuration)
+        private IEnumerator FadeOut(AudioSource audioSource, float fadeDuration = 1)
         {
-            timer += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(startVolume, 0f, timer / fadeDuration);
-            yield return null;
+            float startVolume = GetMuiscVolume();
+
+            float timer = 0f;
+
+            while (timer < fadeDuration)
+            {
+                timer += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(startVolume, 0f, timer / fadeDuration);
+                yield return null;
+            }
+
+            audioSource.volume = 0f;
         }
 
-        audioSource.volume = 0f;
+
+        [Serializable]
+        public class SoundEntry
+        {
+            public string name;
+            public AudioSource source;
+        }
     }
 
-
-    [Serializable]
-    public class SoundEntry
-    {
-        public string name;
-        public AudioSource source;
-    }
 }

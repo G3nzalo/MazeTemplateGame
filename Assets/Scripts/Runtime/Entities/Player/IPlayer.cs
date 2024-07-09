@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public interface IPlayer
+namespace Maze.Runtime.Entities
 {
-    string Id { get; }
+    public interface IPlayer
+    {
+        string Id { get; }
+    }
 }
+

@@ -1,7 +1,10 @@
 ﻿using System;
 
-public interface GameState
+namespace Maze.Runtime.GameStates
 {
-    void Start(Action<GameStateController.GameStates> onEndedCallback);
-    void Stop();
+    public interface GameState
+    {
+        void Start(Action<GameStateController.GameStates> onEndedCallback);
+        void Stop();
+    }
 }

@@ -1,11 +1,14 @@
-public class PlayerConfiguration
+namespace Maze.Runtime.Entities
 {
-    public readonly IInput Input;
-    public readonly float Torque;
-
-    public PlayerConfiguration (IInput input, float torque)
+    public class PlayerConfiguration
     {
-        Input = input;
-        Torque = torque;
+        public readonly IInput Input;
+        public readonly float Torque;
+
+        public PlayerConfiguration(IInput input, float torque)
+        {
+            Input = input;
+            Torque = torque;
+        }
     }
 }

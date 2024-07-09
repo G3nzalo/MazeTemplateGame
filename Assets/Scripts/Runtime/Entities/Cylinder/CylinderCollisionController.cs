@@ -1,24 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
+using Maze.Runtime.Events;
 using UnityEngine;
 
-public class CylinderCollisionController : MonoBehaviour
+namespace Maze.Runtime.Entities
 {
-    private Rigidbody _rigidBody = null;
-
-    private void Awake()
+    public class CylinderCollisionController : MonoBehaviour
     {
-        _rigidBody = GetComponent<Rigidbody>();
-    }
+        private Rigidbody _rigidBody = null;
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag.Equals("Player"))
+        private void Awake()
         {
-            var eventData = new EventData(EventIds.Victory);
-            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
-            eventQueue.EnqueueEvent(eventData);
+            _rigidBody = GetComponent<Rigidbody>();
         }
 
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.tag.Equals("Player"))
+            {
+                var eventData = new EventData(EventIds.Victory);
+                var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+                eventQueue.EnqueueEvent(eventData);
+            }
+
+        }
     }
 }

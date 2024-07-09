@@ -1,23 +1,28 @@
-﻿using UnityEngine;
+﻿using Maze.Runtime.Events;
+using UnityEngine;
 
-public class PlayerCollisionController : MonoBehaviour
+namespace Maze.Runtime.Entities
 {
-    private Rigidbody _rigidBody = null;
-
-    private void Awake()
+    public class PlayerCollisionController : MonoBehaviour
     {
-        _rigidBody = GetComponent<Rigidbody>();
-    }
+        private Rigidbody _rigidBody = null;
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag.Equals("Coin"))
+        private void Awake()
         {
-            Destroy(other.gameObject);
+            _rigidBody = GetComponent<Rigidbody>();
+        }
 
-            var eventData = new EventData(EventIds.CollectedCoin);
-            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
-            eventQueue.EnqueueEvent(eventData);
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.tag.Equals("Coin"))
+            {
+                Destroy(other.gameObject);
+
+                var eventData = new EventData(EventIds.CollectedCoin);
+                var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+                eventQueue.EnqueueEvent(eventData);
+            }
+
         }
 
     }

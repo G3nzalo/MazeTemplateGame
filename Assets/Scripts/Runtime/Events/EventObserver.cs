@@ -1,8 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-public interface EventObserver
+namespace Maze.Runtime.Events
 {
-    void Process(EventData eventData);
+    public interface EventObserver
+    {
+        void Process(EventData eventData);
+    }
+
 }

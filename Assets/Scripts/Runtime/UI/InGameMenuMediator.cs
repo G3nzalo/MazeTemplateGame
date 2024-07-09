@@ -1,10 +1,13 @@
-
-public interface InGameMenuMediator
+namespace Maze.Runtime.UI
 {
-    void OnBackToMenuPressed();
-    void OnResumeButton();
-    void OnQuitGame();
-    void OnHideTimer();
-    void OnSaveGame();
-    void OnLoadGame();
+    public interface InGameMenuMediator
+    {
+        void OnBackToMenuPressed();
+        void OnResumeButton();
+        void OnQuitGame();
+        void OnHideTimer();
+        void OnSaveGame();
+        void OnLoadGame();
+    }
+
 }

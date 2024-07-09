@@ -1,19 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ScreenFade : MonoBehaviour
+namespace Maze.Runtime.UI
 {
-    [SerializeField] private Image _screenFadeImage;
-
-    public void Show()
+    public class ScreenFade : MonoBehaviour
     {
-        gameObject.SetActive(true);
-    }
+        [SerializeField] private Image _screenFadeImage;
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
     }
 }

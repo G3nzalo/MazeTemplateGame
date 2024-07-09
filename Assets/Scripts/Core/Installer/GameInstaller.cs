@@ -1,3 +1,6 @@
+using Maze.Runtime.Entities;
+using Maze.Runtime.GameStates;
+using Maze.Runtime.UI;
 using UnityEngine;
 
 namespace Core.Installers

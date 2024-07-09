@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Maze.Runtime.Events;
 using Patterns.Behaviour.Command;
-using UnityEngine;
 
 namespace Maze.Runtime.Commands
 {

@@ -1,37 +1,39 @@
-using System.Collections;
-using System.Collections.Generic;
+using Maze.Runtime.Score;
 using TMPro;
 using UnityEngine;
 
-public class ScoreView : MonoBehaviour
+namespace Maze.Runtime.UI
 {
-    [SerializeField] private TextMeshProUGUI _scoreTxt = null;
-
-    public void Show()
+    public class ScoreView : MonoBehaviour
     {
-        gameObject.SetActive(true);
-    }
+        [SerializeField] private TextMeshProUGUI _scoreTxt = null;
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
 
-    public void UpdateScore()
-    {
-        ScoreSystem.Instance.OnCollectedCoin();
-        string currentScore = ScoreSystem.Instance.GetScore;
-        _scoreTxt.text = currentScore;
-    }
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
 
-    public void ReloadScoreFromDB()
-    {
-        string currentScore = ScoreSystem.Instance.GetScore;
-        _scoreTxt.text = currentScore;
-    }
+        public void UpdateScore()
+        {
+            ScoreSystem.Instance.OnCollectedCoin();
+            string currentScore = ScoreSystem.Instance.GetScore;
+            _scoreTxt.text = currentScore;
+        }
 
-    public void ResetScore()
-    {
-        _scoreTxt.text = ScoreSystem.Instance.OnResetScore();
+        public void ReloadScoreFromDB()
+        {
+            string currentScore = ScoreSystem.Instance.GetScore;
+            _scoreTxt.text = currentScore;
+        }
+
+        public void ResetScore()
+        {
+            _scoreTxt.text = ScoreSystem.Instance.OnResetScore();
+        }
     }
 }

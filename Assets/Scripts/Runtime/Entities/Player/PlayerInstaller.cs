@@ -1,34 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInstaller : MonoBehaviour
+namespace Maze.Runtime.Entities
 {
-    [SerializeField] private GameObject _prefab;
-    [SerializeField] private PlayerToSpawnConfiguration _playerToSpawnConfiguration;
-
-    private PlayerBuilder _playerBuilder;
-
-    private void Start()
+    public class PlayerInstaller : MonoBehaviour
     {
-        var playerFactory = ServiceLocator.Instance.GetService<PlayerFactory>();
+        [SerializeField] private GameObject _prefab;
+        [SerializeField] private PlayerToSpawnConfiguration _playerToSpawnConfiguration;
 
-        _playerBuilder = playerFactory.Create()
-                                  .WithConfiguration(_playerToSpawnConfiguration)
-                                  .WithPosition(_playerToSpawnConfiguration.Position)
-                                  .WithRotation(_playerToSpawnConfiguration.Rotation);
-        SetInput(_playerBuilder);
-    }
+        private PlayerBuilder _playerBuilder;
 
-    private void SetInput(PlayerBuilder playerBuilder)
-    {
-        playerBuilder.WithInputMode(PlayerBuilder.InputMode.Unity);
+        private void Start()
+        {
+            var playerFactory = ServiceLocator.Instance.GetService<PlayerFactory>();
 
-    }
+            _playerBuilder = playerFactory.Create()
+                                      .WithConfiguration(_playerToSpawnConfiguration)
+                                      .WithPosition(_playerToSpawnConfiguration.Position)
+                                      .WithRotation(_playerToSpawnConfiguration.Rotation);
+            SetInput(_playerBuilder);
+        }
 
-    public void SpawnPlayer()
-    {
-        _playerBuilder.Build(_prefab);
+        private void SetInput(PlayerBuilder playerBuilder)
+        {
+            playerBuilder.WithInputMode(PlayerBuilder.InputMode.Unity);
+
+        }
+
+        public void SpawnPlayer()
+        {
+            _playerBuilder.Build(_prefab);
+        }
+
     }
 
 }

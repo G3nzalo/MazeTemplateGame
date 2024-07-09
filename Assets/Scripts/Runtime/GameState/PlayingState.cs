@@ -1,30 +1,32 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Maze.Runtime.Events;
 
-public class PlayingState : GameState, EventObserver
+namespace Maze.Runtime.GameStates
 {
-    private Action<GameStateController.GameStates> _onEndedCallback;
-
-    public void Start(Action<GameStateController.GameStates> onEndedCallback)
+    public class PlayingState : GameState, EventObserver
     {
-        _onEndedCallback = onEndedCallback;
-        var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
-        eventQueue.Subscribe(EventIds.Victory, this);
-    }
+        private Action<GameStateController.GameStates> _onEndedCallback;
 
-    public void Stop()
-    {
-        var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
-        eventQueue.Unsubscribe(EventIds.Victory, this);
-    }
-
-    public void Process(EventData eventData)
-    {
-        if (eventData.EventId == EventIds.Victory)
+        public void Start(Action<GameStateController.GameStates> onEndedCallback)
         {
-            _onEndedCallback?.Invoke(GameStateController.GameStates.Victory);
+            _onEndedCallback = onEndedCallback;
+            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+            eventQueue.Subscribe(EventIds.Victory, this);
+        }
+
+        public void Stop()
+        {
+            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+            eventQueue.Unsubscribe(EventIds.Victory, this);
+        }
+
+        public void Process(EventData eventData)
+        {
+            if (eventData.EventId == EventIds.Victory)
+            {
+                _onEndedCallback?.Invoke(GameStateController.GameStates.Victory);
+            }
         }
     }
+
 }

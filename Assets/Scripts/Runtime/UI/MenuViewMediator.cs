@@ -1,153 +1,160 @@
 using Maze.Runtime.Commands;
+using Maze.Runtime.Events;
+using Maze.Runtime.GameData;
+using Maze.Tools;
 using Patterns.Behaviour.Command;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, EventObserver
+namespace Maze.Runtime.UI
 {
-    [SerializeField] private Button _pauseButton;
-    [SerializeField] private PauseMenuView _pauseMenuView;
-    [SerializeField] private VictoryView _victoryView;
-    [SerializeField] private Timer _timer;
-    [SerializeField] private ScoreView _scoreViewAmount;
-    [SerializeField] private TextMeshProUGUI _scoreTxt;
-    [SerializeField] private GameFacade _gameFacade;
-
-    public Button PauseButton => _pauseButton;
-    private CommandQueue _commandQueue;
-
-    private void Awake()
+    public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, EventObserver
     {
-        _pauseButton.onClick.AddListener(OnPauseButtonPressed);
-        _pauseMenuView.Configure(this);
-        _victoryView.Configure(this);
-    }
+        [SerializeField] private Button _pauseButton;
+        [SerializeField] private PauseMenuView _pauseMenuView;
+        [SerializeField] private VictoryView _victoryView;
+        [SerializeField] private Timer _timer;
+        [SerializeField] private ScoreView _scoreViewAmount;
+        [SerializeField] private TextMeshProUGUI _scoreTxt;
+        [SerializeField] private GameFacade _gameFacade;
 
-    private void Start()
-    {
-        _commandQueue = ServiceLocator.Instance.GetService<CommandQueue>();
+        public Button PauseButton => _pauseButton;
+        private CommandQueue _commandQueue;
 
-        HideAllMenus();
-        InitializeSystems();
+        private void Awake()
+        {
+            _pauseButton.onClick.AddListener(OnPauseButtonPressed);
+            _pauseMenuView.Configure(this);
+            _victoryView.Configure(this);
+        }
 
-        ServiceLocator.Instance.GetService<EventQueue>()
-                      .Subscribe(EventIds.Victory, this);
+        private void Start()
+        {
+            _commandQueue = ServiceLocator.Instance.GetService<CommandQueue>();
 
-        ServiceLocator.Instance.GetService<EventQueue>()
-                     .Subscribe(EventIds.CollectedCoin, this);
-    }
+            HideAllMenus();
+            InitializeSystems();
 
-    private void InitializeSystems()
-    {
-        _pauseButton.gameObject.SetActive(true);
-        _timer.Show();
-        _timer.StartTimer();
-        _scoreViewAmount.ResetScore();
-        _scoreViewAmount.Show();
-    }
+            ServiceLocator.Instance.GetService<EventQueue>()
+                          .Subscribe(EventIds.Victory, this);
 
-    private void OnDestroy()
-    {
-        ServiceLocator.Instance.GetService<EventQueue>()
-                      .Unsubscribe(EventIds.Victory, this);
+            ServiceLocator.Instance.GetService<EventQueue>()
+                         .Subscribe(EventIds.CollectedCoin, this);
+        }
 
-        ServiceLocator.Instance.GetService<EventQueue>()
-                     .Unsubscribe(EventIds.CollectedCoin, this);
-    }
+        private void InitializeSystems()
+        {
+            _pauseButton.gameObject.SetActive(true);
+            _timer.Show();
+            _timer.StartTimer();
+            _scoreViewAmount.ResetScore();
+            _scoreViewAmount.Show();
+        }
 
-    private void HideAllMenus()
-    {
-        _pauseMenuView.Hide();
-        _victoryView.Hide();
-        _scoreViewAmount.Hide();
-        _timer.Hide();
-        _scoreTxt.gameObject.SetActive(false);
-    }
+        private void OnDestroy()
+        {
+            ServiceLocator.Instance.GetService<EventQueue>()
+                          .Unsubscribe(EventIds.Victory, this);
 
-    private void OnPauseButtonPressed()
-    {
-        _commandQueue.AddCommand(new PauseGameCommand());
-        _pauseButton.gameObject.SetActive(false);
-        _timer.Pause();
-        _timer.Hide();
-        _scoreViewAmount.Hide();
-        _scoreTxt.gameObject.SetActive(false);
-        _pauseMenuView.Show();
-    }
+            ServiceLocator.Instance.GetService<EventQueue>()
+                         .Unsubscribe(EventIds.CollectedCoin, this);
+        }
 
-    public void OnBackToMenuPressed()
-    {
-        _scoreViewAmount.ResetScore();
-        _timer.ResetTimer();
-        _timer.Hide();
-        _scoreViewAmount.Hide();
-        _scoreTxt.gameObject.SetActive(false);
-        _commandQueue.AddCommand(new LoadSceneCommand("Menu"));
-        _pauseButton.gameObject.SetActive(false);
-        ResumeGame();
-    }
+        private void HideAllMenus()
+        {
+            _pauseMenuView.Hide();
+            _victoryView.Hide();
+            _scoreViewAmount.Hide();
+            _timer.Hide();
+            _scoreTxt.gameObject.SetActive(false);
+        }
 
-    public void OnQuitGame()
-    {
+        private void OnPauseButtonPressed()
+        {
+            _commandQueue.AddCommand(new PauseGameCommand());
+            _pauseButton.gameObject.SetActive(false);
+            _timer.Pause();
+            _timer.Hide();
+            _scoreViewAmount.Hide();
+            _scoreTxt.gameObject.SetActive(false);
+            _pauseMenuView.Show();
+        }
+
+        public void OnBackToMenuPressed()
+        {
+            _scoreViewAmount.ResetScore();
+            _timer.ResetTimer();
+            _timer.Hide();
+            _scoreViewAmount.Hide();
+            _scoreTxt.gameObject.SetActive(false);
+            _commandQueue.AddCommand(new LoadSceneCommand("Menu"));
+            _pauseButton.gameObject.SetActive(false);
+            ResumeGame();
+        }
+
+        public void OnQuitGame()
+        {
 
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-        Application.Quit();
+            Application.Quit();
 #endif
-    }
-
-    public void OnResumeButton()
-    {
-        _pauseMenuView.Hide();
-        _timer.Show();
-        _timer.Unpause();
-        _timer.StartTimer(_timer.CurrentTime);
-        _pauseButton.gameObject.SetActive(true);
-        _scoreViewAmount.Show();
-        _scoreTxt.gameObject.SetActive(true);
-        ResumeGame();
-    }
-
-    public void OnSaveGame()
-    {
-        _gameFacade.Save();
-        OnResumeButton();
-    }
-
-    public void OnLoadGame()
-    {
-        _gameFacade.Load();
-        OnResumeButton();
-        _scoreViewAmount.ReloadScoreFromDB();
-    }
-
-    private void ResumeGame()
-    {
-        _commandQueue.AddCommand(new ResumeGameCommand());
-    }
-
-    public void OnHideTimer()
-    {
-        _timer.Hide();
-    }
-
-    public void Process(EventData eventData)
-    {
-        if (eventData.EventId == EventIds.Victory)
-        {
-            _pauseButton.gameObject.SetActive(false);
-            _scoreViewAmount.ResetScore();
-            HideAllMenus();
-            _victoryView.Show();
-            return;
         }
 
-        if (eventData.EventId == EventIds.CollectedCoin)
+        public void OnResumeButton()
         {
-            _scoreViewAmount.UpdateScore();
-            return;
+            _pauseMenuView.Hide();
+            _timer.Show();
+            _timer.Unpause();
+            _timer.StartTimer(_timer.CurrentTime);
+            _pauseButton.gameObject.SetActive(true);
+            _scoreViewAmount.Show();
+            _scoreTxt.gameObject.SetActive(true);
+            ResumeGame();
+        }
+
+        public void OnSaveGame()
+        {
+            _gameFacade.Save();
+            OnResumeButton();
+        }
+
+        public void OnLoadGame()
+        {
+            _gameFacade.Load();
+            OnResumeButton();
+            _scoreViewAmount.ReloadScoreFromDB();
+        }
+
+        private void ResumeGame()
+        {
+            _commandQueue.AddCommand(new ResumeGameCommand());
+        }
+
+        public void OnHideTimer()
+        {
+            _timer.Hide();
+        }
+
+        public void Process(EventData eventData)
+        {
+            if (eventData.EventId == EventIds.Victory)
+            {
+                _pauseButton.gameObject.SetActive(false);
+                _scoreViewAmount.ResetScore();
+                HideAllMenus();
+                _victoryView.Show();
+                return;
+            }
+
+            if (eventData.EventId == EventIds.CollectedCoin)
+            {
+                _scoreViewAmount.UpdateScore();
+                return;
+            }
         }
     }
+
 }
