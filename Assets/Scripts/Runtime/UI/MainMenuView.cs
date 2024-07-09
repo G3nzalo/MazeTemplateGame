@@ -14,12 +14,12 @@ namespace Maze.Runtime.UI
         private void Start()
         {
             _startGameButton.onClick.AddListener(OnStartButtonPressed);
-            //_loadGameButton.onClick.AddListener(OnLoadButtonPressed);
             _quitButton.onClick.AddListener(OnQuitButtonPressed);
         }
 
         private void OnStartButtonPressed()
         {
+            _startGameButton.onClick.RemoveAllListeners();
             LoadGameSceneCommand loadGameSceneCommand = new LoadGameSceneCommand();
 
             ServiceLocator.Instance.GetService<CommandQueue>()
@@ -28,6 +28,8 @@ namespace Maze.Runtime.UI
 
         private void OnLoadButtonPressed()
         {
+            _loadGameButton.onClick.RemoveAllListeners();
+
             LoadGameSceneCommand loadGameSceneCommand = new LoadGameSceneCommand();
 
             ServiceLocator.Instance.GetService<CommandQueue>()
@@ -37,6 +39,8 @@ namespace Maze.Runtime.UI
 
         private void OnQuitButtonPressed()
         {
+            _quitButton.onClick.RemoveAllListeners();
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
