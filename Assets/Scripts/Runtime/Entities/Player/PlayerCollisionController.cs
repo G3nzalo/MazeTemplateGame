@@ -14,6 +14,10 @@ public class PlayerCollisionController : MonoBehaviour
         if (other.gameObject.tag.Equals("Coin"))
         {
             Destroy(other.gameObject);
+
+            var eventData = new EventData(EventIds.CollectedCoin);
+            var eventQueue = ServiceLocator.Instance.GetService<EventQueue>();
+            eventQueue.EnqueueEvent(eventData);
         }
 
     }

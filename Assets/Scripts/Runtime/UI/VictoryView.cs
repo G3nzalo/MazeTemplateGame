@@ -20,6 +20,7 @@ public class VictoryView : MonoBehaviour
 
     public void Show()
     {
+        _mediator.OnHideTimer();
         gameObject.SetActive(true);
     }
 

@@ -10,6 +10,9 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
     [SerializeField] private PauseMenuView _pauseMenuView;
     [SerializeField] private VictoryView _victoryView;
     [SerializeField] private Timer _timer;
+    [SerializeField] private ScoreView _scoreViewAmount;
+    [SerializeField] private TextMeshProUGUI _scoreTxt;
+
 
     public Button PauseButton => _pauseButton;
     private CommandQueue _commandQueue;
@@ -24,16 +27,24 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
     void Start()
     {
         _commandQueue = ServiceLocator.Instance.GetService<CommandQueue>();
+
         HideAllMenus();
-        _pauseButton.gameObject.SetActive(true);
-        _timer.Show();
-        _timer.StartTimer();
+        InitializeSystems();
 
         ServiceLocator.Instance.GetService<EventQueue>()
                       .Subscribe(EventIds.Victory, this);
 
-        //ServiceLocator.Instance.GetService<EventQueue>()
-        //              .Subscribe(EventIds.GameOver, this);
+        ServiceLocator.Instance.GetService<EventQueue>()
+                     .Subscribe(EventIds.CollectedCoin, this);
+    }
+
+    private void InitializeSystems()
+    {
+        _pauseButton.gameObject.SetActive(true);
+        _timer.Show();
+        _timer.StartTimer();
+        _scoreViewAmount.ResetScore();
+        _scoreViewAmount.Show();
     }
 
     private void OnDestroy()
@@ -41,16 +52,17 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         ServiceLocator.Instance.GetService<EventQueue>()
                       .Unsubscribe(EventIds.Victory, this);
 
-        //ServiceLocator.Instance.GetService<EventQueue>()
-        //              .Unsubscribe(EventIds.GameOver, this);
+        ServiceLocator.Instance.GetService<EventQueue>()
+                     .Unsubscribe(EventIds.CollectedCoin, this);
     }
 
     private void HideAllMenus()
     {
         _pauseMenuView.Hide();
         _victoryView.Hide();
-
-        //_gameOverView.Hide();
+        _scoreViewAmount.Hide();
+        _timer.Hide();
+        _scoreTxt.gameObject.SetActive(false);
     }
 
     private void OnPauseButtonPressed()
@@ -59,13 +71,18 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         _pauseButton.gameObject.SetActive(false);
         _timer.Pause();
         _timer.Hide();
+        _scoreViewAmount.Hide();
+        _scoreTxt.gameObject.SetActive(false);
         _pauseMenuView.Show();
     }
 
     public void OnBackToMenuPressed()
     {
+        _scoreViewAmount.ResetScore();
         _timer.ResetTimer();
         _timer.Hide();
+        _scoreViewAmount.Hide();
+        _scoreTxt.gameObject.SetActive(false);
         _commandQueue.AddCommand(new LoadSceneCommand("Menu"));
         _pauseButton.gameObject.SetActive(false);
         ResumeGame();
@@ -73,10 +90,10 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
 
     public void OnQuitGame()
     {
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-        _pauseButton.gameObject.SetActive(false);
         Application.Quit();
 #endif
     }
@@ -88,6 +105,8 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         _timer.Unpause();
         _timer.StartTimer(_timer.CurrentTime);
         _pauseButton.gameObject.SetActive(true);
+        _scoreViewAmount.Show();
+        _scoreTxt.gameObject.SetActive(true);
         ResumeGame();
     }
 
@@ -96,19 +115,27 @@ public partial class MenuViewMediator : MonoBehaviour, InGameMenuMediator, Event
         _commandQueue.AddCommand(new ResumeGameCommand());
     }
 
+    public void OnHideTimer()
+    {
+        _timer.Hide();
+    }
+
     public void Process(EventData eventData)
     {
         if (eventData.EventId == EventIds.Victory)
         {
             _pauseButton.gameObject.SetActive(false);
+            _scoreViewAmount.ResetScore();
+            HideAllMenus();
             _victoryView.Show();
             return;
         }
 
-        //if (eventData.EventId == EventIds.GameOver)
-        //{
-        //    _gameOverView.Show();
-        //    return;
-        //}
+        if (eventData.EventId == EventIds.CollectedCoin)
+        {
+            _scoreViewAmount.UpdateScore();
+            return;
+        }
     }
+
 }
