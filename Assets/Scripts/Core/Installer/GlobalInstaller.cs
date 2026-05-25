@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Maze.Runtime.Commands;
 using Core.DataStorage;
@@ -14,6 +13,8 @@ namespace Core.Installers
         {
             ServiceLocator.Instance.GetService<CommandQueue>()
                           .AddCommand(new LoadSceneCommand("Menu"));
+            // ServiceLocator.Instance.GetService<CommandQueue>()
+            //   .AddCommand(new LoadSceneCommand("Game"));
         }
 
         protected override void DoInstallDependencies()

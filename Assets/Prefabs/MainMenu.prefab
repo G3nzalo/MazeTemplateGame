@@ -51,7 +51,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _startGameButton: {fileID: 3864158935964967235}
-  _loadGameButton: {fileID: 0}
   _quitButton: {fileID: 1146020241508193266}
 --- !u!1 &7486817146437071481
 GameObject:
@@ -73,7 +72,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5521473782701498765
 RectTransform:
   m_ObjectHideFlags: 0
