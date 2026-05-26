@@ -45,6 +45,7 @@ public class GameAudioManager : MonoBehaviour
     IEnumerator LevelRoutine()
     {
         levelRunning = true;
+        DebugAudio.Instance.Clear();
 
         currentState =
             GameAudioState.Training;
@@ -185,9 +186,18 @@ public class GameAudioManager : MonoBehaviour
         currentEvaluationResult =
             sameNote && inTune;
 
+        string result =
+            currentEvaluationResult ? "OK" : "FAIL";
+
+        // DEBUG UI PANEL
+        DebugAudio.Instance.AddLine(
+            $"{targetNote} → {lastDetectedNote} | " +
+            $"{(percentError * 100f):F1}% | {result}"
+        );
+
+        // DEBUG CONSOLE (opcional mantener)
         Debug.Log(
-            $"TARGET FREQ: {targetFreq:F2} Hz | " +
-            $"AVG FREQ: {averageFreq:F2} Hz");
+            $"TARGET FREQ: {targetFreq:F2} Hz | AVG FREQ: {averageFreq:F2} Hz");
 
         Debug.Log(
             $"ERROR: {(percentError * 100f):F2}%");
@@ -239,13 +249,14 @@ public class GameAudioManager : MonoBehaviour
             scoreSystem.Passed(
                 levelData.passPercentage);
 
-        Debug.Log(
-            $"Accuracy: {accuracy}");
+        DebugAudio.Instance.AddLine("");
+        DebugAudio.Instance.AddLine("===== RESULT =====");
 
-        Debug.Log(
-            passed
-            ? "LEVEL PASSED"
-            : "LEVEL FAILED");
+        DebugAudio.Instance.AddLine(
+        $"Accuracy: {accuracy:F1}%");
+
+        DebugAudio.Instance.AddLine(
+        passed ? "LEVEL PASSED" : "LEVEL FAILED");
 
         uiManager.UnlockAll();
 
