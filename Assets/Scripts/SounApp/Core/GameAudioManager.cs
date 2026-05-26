@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameAudioManager : MonoBehaviour
@@ -25,9 +27,7 @@ public class GameAudioManager : MonoBehaviour
 
     private bool currentEvaluationResult;
 
-    private int playerBaseMidi;
-
-    private bool basePitchCaptured;
+    private string lastDetectedNote = "NONE";
 
     private void Awake()
     {
@@ -54,12 +54,7 @@ public class GameAudioManager : MonoBehaviour
         scoreSystem.totalNotes = 0;
         scoreSystem.correctNotes = 0;
 
-        basePitchCaptured = false;
-
         yield return new WaitForSeconds(1f);
-
-        NoteName referenceNote =
-            levelData.notes[0].note;
 
         for (int i = 0; i < levelData.notes.Count; i++)
         {
@@ -85,14 +80,10 @@ public class GameAudioManager : MonoBehaviour
                     visualIndex,
                     duration));
 
-            float noteDuration =
-                GetDuration(note.duration);
-
             yield return StartCoroutine(
                 EvaluatePlayerPitch(
                     note.note,
-                    referenceNote,
-                    noteDuration));
+                    duration));
 
             bool success =
                 currentEvaluationResult;
@@ -100,7 +91,8 @@ public class GameAudioManager : MonoBehaviour
             scoreSystem.Register(success);
 
             Debug.Log(
-                $"NOTE {i} -> " +
+                $"TARGET: {note.note} | " +
+                $"SUNG: {lastDetectedNote} | " +
                 $"{(success ? "OK" : "FAIL")}");
         }
 
@@ -108,13 +100,15 @@ public class GameAudioManager : MonoBehaviour
     }
 
     IEnumerator EvaluatePlayerPitch(
-        NoteName targetNote,
-        NoteName referenceNote,
-        float duration)
+    NoteName targetNote,
+    float duration)
     {
         float timer = 0f;
 
-        float correctTime = 0f;
+        float warmupTime = 0.15f;
+
+        List<float> detectedFrequencies =
+            new List<float>();
 
         while (timer < duration)
         {
@@ -122,39 +116,115 @@ public class GameAudioManager : MonoBehaviour
 
             if (pitchDetector.HasValidPitch)
             {
-                if (!basePitchCaptured)
+                float freq =
+                    pitchDetector.CurrentPitch;
+
+                if (freq > 0f)
                 {
-                    playerBaseMidi =
-                        pitchEvaluator
-                        .FrequencyToMidi(
-                            pitchDetector.CurrentPitch);
-
-                    basePitchCaptured = true;
-                }
-
-                bool correct =
-                    pitchEvaluator
-                    .IsIntervalCorrect(
-                        playerBaseMidi,
-                        pitchDetector.CurrentPitch,
-                        targetNote,
-                        referenceNote);
-
-                if (correct)
-                {
-                    correctTime +=
-                        Time.deltaTime;
+                    // IGNORAR ATAQUE INICIAL
+                    if (timer > warmupTime)
+                    {
+                        detectedFrequencies.Add(freq);
+                    }
                 }
             }
 
             yield return null;
         }
 
-        float required =
-            duration * 0.85f;
+        // SIN DATOS
+        if (detectedFrequencies.Count == 0)
+        {
+            currentEvaluationResult = false;
+            lastDetectedNote = "NONE";
+            yield break;
+        }
+
+        // PROMEDIO
+        float averageFreq =
+            detectedFrequencies.Average();
+
+        int detectedMidi =
+            pitchEvaluator
+            .FrequencyToMidi(
+                averageFreq);
+
+        int targetMidi =
+            pitchEvaluator
+            .NoteToMidi(
+                targetNote);
+
+        lastDetectedNote =
+            MidiToNoteName(
+                detectedMidi);
+
+        // MISMA NOTA
+        bool sameNote =
+            detectedMidi ==
+            targetMidi;
+
+        // ERROR %
+        float targetFreq =
+            pitchEvaluator
+            .MidiToFrequency(
+                targetMidi);
+
+        float percentError =
+            Mathf.Abs(
+                averageFreq -
+                targetFreq)
+            / targetFreq;
+
+        float tolerance =
+            levelData.pitchTolerancePercent
+            / 100f;
+
+        bool inTune =
+            percentError <= tolerance;
 
         currentEvaluationResult =
-            correctTime >= required;
+            sameNote && inTune;
+
+        Debug.Log(
+            $"TARGET FREQ: {targetFreq:F2} Hz | " +
+            $"AVG FREQ: {averageFreq:F2} Hz");
+
+        Debug.Log(
+            $"ERROR: {(percentError * 100f):F2}%");
+
+        Debug.Log(
+            $"FINAL NOTE: {lastDetectedNote}");
+    }
+
+    string MidiToNoteName(int midi)
+    {
+        string[] names =
+        {
+            "C",
+            "C#",
+            "D",
+            "D#",
+            "E",
+            "F",
+            "F#",
+            "G",
+            "G#",
+            "A",
+            "A#",
+            "B"
+        };
+
+        if (midi < 0 || midi > 127)
+            return "INVALID";
+
+        int noteIndex =
+            Mathf.Abs(midi % 12);
+
+        int octave =
+            (midi / 12) - 1;
+
+        return names[noteIndex] +
+               octave;
     }
 
     void EndLevel()

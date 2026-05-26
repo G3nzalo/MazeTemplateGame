@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
-[RequireComponent(typeof(AudioSource))]
 public class VocalPitchDetector : MonoBehaviour
 {
     [Header("UI")]
@@ -12,22 +11,22 @@ public class VocalPitchDetector : MonoBehaviour
     public TMP_Text debugText;
 
     [Header("Detection")]
-    public float minVolume = 0.01f;
+    public float minVolume = 0.02f;
 
     [Range(0f, 1f)]
     public float clarityThreshold = 0.6f;
 
     [Range(1f, 30f)]
-    public float smoothingSpeed = 20f;
+    public float smoothingSpeed = 10f;
 
-    private AudioSource audioSource;
     private AudioClip micClip;
     private string micDevice;
 
     private const int sampleRate = 44100;
-    private const int sampleSize = 2048;
+    private const int sampleSize = 4096;
 
-    private float[] samples = new float[sampleSize];
+    private readonly float[] samples =
+        new float[sampleSize];
 
     private bool micReady = false;
 
@@ -46,9 +45,6 @@ public class VocalPitchDetector : MonoBehaviour
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
-        audioSource.loop = true;
-
         StartCoroutine(InitMic());
     }
 
@@ -74,13 +70,11 @@ public class VocalPitchDetector : MonoBehaviour
         while (Microphone.GetPosition(micDevice) <= 0)
             yield return null;
 
-        audioSource.clip = micClip;
-        audioSource.Play();
-
         micReady = true;
 
         debugText.text = "Mic Ready";
     }
+
     void Update()
     {
         if (!micReady)
@@ -114,8 +108,23 @@ public class VocalPitchDetector : MonoBehaviour
         float detectedPitch =
             DetectPitch(samples, sampleRate);
 
-        // SI EL PITCH ES VÁLIDO
-        if (detectedPitch > 0)
+        // SUAVIZADO
+        if (detectedPitch <= 0f)
+        {
+            currentPitch = 0f;
+
+            noteText.text = "--";
+            freqText.text = "";
+            centsText.text = "";
+
+            return;
+        }
+
+        if (currentPitch <= 0f)
+        {
+            currentPitch = detectedPitch;
+        }
+        else
         {
             currentPitch =
                 Mathf.Lerp(
@@ -126,11 +135,12 @@ public class VocalPitchDetector : MonoBehaviour
 
         // FILTRO RANGO VOCAL
         if (currentPitch < 70f ||
-            currentPitch > 1000f)
+            currentPitch > 500f)
         {
             noteText.text = "--";
             freqText.text = "";
             centsText.text = "";
+
             debugText.text =
                 $"Out of vocal range\n" +
                 $"Pitch: {currentPitch:F2}";
@@ -146,6 +156,7 @@ public class VocalPitchDetector : MonoBehaviour
             $"Detected: {detectedPitch:F2}\n" +
             $"RMS: {rms:F4}";
     }
+
     float CalculateRMS(float[] data)
     {
         float sum = 0f;
@@ -189,9 +200,6 @@ public class VocalPitchDetector : MonoBehaviour
         if (bestLag == -1)
             return -1f;
 
-        // if (bestCorrelation < clarityThreshold)
-        //     return -1f;
-
         return (float)rate / bestLag;
     }
 
@@ -205,7 +213,7 @@ public class VocalPitchDetector : MonoBehaviour
             Mathf.RoundToInt(midi);
 
         int noteIndex =
-            roundedMidi % 12;
+            Mathf.Abs(roundedMidi % 12);
 
         int octave =
             (roundedMidi / 12) - 1;
@@ -232,5 +240,23 @@ public class VocalPitchDetector : MonoBehaviour
 
         centsText.text =
             $"{cents:+0;-0} cents";
+    }
+
+    private void OnDisable()
+    {
+        StopMicrophone();
+    }
+
+    private void OnApplicationQuit()
+    {
+        StopMicrophone();
+    }
+
+    void StopMicrophone()
+    {
+        if (!string.IsNullOrEmpty(micDevice))
+        {
+            Microphone.End(micDevice);
+        }
     }
 }

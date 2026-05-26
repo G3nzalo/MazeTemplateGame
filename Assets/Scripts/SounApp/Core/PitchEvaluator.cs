@@ -33,33 +33,11 @@ public class PitchEvaluator : MonoBehaviour
         return 48;
     }
 
-    public bool IsIntervalCorrect(
-        int playerBaseMidi,
-        float detectedFreq,
-        NoteName targetNote,
-        NoteName referenceNote,
-        float toleranceSemitones = 1f)
+    public float MidiToFrequency(int midi)
     {
-        int detectedMidi =
-            FrequencyToMidi(detectedFreq);
-
-        int targetMidi =
-            NoteToMidi(targetNote);
-
-        int referenceMidi =
-            NoteToMidi(referenceNote);
-
-        int expectedInterval =
-            targetMidi - referenceMidi;
-
-        int playerInterval =
-            detectedMidi - playerBaseMidi;
-
-        float difference =
-            Mathf.Abs(
-                playerInterval -
-                expectedInterval);
-
-        return difference <= toleranceSemitones;
+        return 440f *
+               Mathf.Pow(
+                   2f,
+                   (midi - 69f) / 12f);
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcf33dee560ae488ab217c29377cb20a, type: 3}
   m_Name: LevelTest
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  bpm: 150
+  bpm: 75
   notes:
   - isRest: 0
     note: 0
@@ -21,7 +21,13 @@ MonoBehaviour:
     note: 1
     duration: 0
   - isRest: 0
-    note: 7
+    note: 2
+    duration: 0
+  - isRest: 0
+    note: 3
+    duration: 0
+  - isRest: 0
+    note: 4
     duration: 0
   pitchTolerancePercent: 2
-  passPercentage: 85
+  passPercentage: 80
