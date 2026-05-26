@@ -13,7 +13,12 @@ public class VocalPitchDetector : MonoBehaviour
 
     [Header("Detection")]
     public float minVolume = 0.01f;
+
+    [Range(0f, 1f)]
     public float clarityThreshold = 0.6f;
+
+    [Range(1f, 30f)]
+    public float smoothingSpeed = 20f;
 
     private AudioSource audioSource;
     private AudioClip micClip;
@@ -25,6 +30,13 @@ public class VocalPitchDetector : MonoBehaviour
     private float[] samples = new float[sampleSize];
 
     private bool micReady = false;
+
+    private float currentPitch;
+
+    // SOLO LECTURA PARA OTROS SISTEMAS
+    public float CurrentPitch => currentPitch;
+
+    public bool HasValidPitch => currentPitch > 0f;
 
     private readonly string[] noteNames =
     {
@@ -42,7 +54,8 @@ public class VocalPitchDetector : MonoBehaviour
 
     IEnumerator InitMic()
     {
-        yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
+        yield return Application.RequestUserAuthorization(
+            UserAuthorization.Microphone);
 
         if (Microphone.devices.Length == 0)
         {
@@ -52,7 +65,11 @@ public class VocalPitchDetector : MonoBehaviour
 
         micDevice = Microphone.devices[0];
 
-        micClip = Microphone.Start(micDevice, true, 10, sampleRate);
+        micClip = Microphone.Start(
+            micDevice,
+            true,
+            10,
+            sampleRate);
 
         while (Microphone.GetPosition(micDevice) <= 0)
             yield return null;
@@ -64,72 +81,102 @@ public class VocalPitchDetector : MonoBehaviour
 
         debugText.text = "Mic Ready";
     }
-
     void Update()
     {
         if (!micReady)
             return;
 
-        int micPos = Microphone.GetPosition(micDevice);
+        int micPos =
+            Microphone.GetPosition(micDevice);
 
         if (micPos < sampleSize)
             return;
 
-        micClip.GetData(samples, micPos - sampleSize);
+        micClip.GetData(
+            samples,
+            micPos - sampleSize);
 
-        float rms = CalculateRMS(samples);
+        float rms =
+            CalculateRMS(samples);
 
-        // Noise Gate
+        // NOISE GATE
         if (rms < minVolume)
         {
             noteText.text = "--";
             freqText.text = "";
             centsText.text = "";
             debugText.text = "No voice";
+
             return;
         }
 
-        float frequency = DetectPitch(samples, sampleRate);
+        // DETECTAR PITCH
+        float detectedPitch =
+            DetectPitch(samples, sampleRate);
 
-        // Filtrar frecuencias raras
-        if (frequency < 70 || frequency > 1000)
+        // SI EL PITCH ES VÁLIDO
+        if (detectedPitch > 0)
+        {
+            currentPitch =
+                Mathf.Lerp(
+                    currentPitch,
+                    detectedPitch,
+                    Time.deltaTime * smoothingSpeed);
+        }
+
+        // FILTRO RANGO VOCAL
+        if (currentPitch < 70f ||
+            currentPitch > 1000f)
         {
             noteText.text = "--";
             freqText.text = "";
             centsText.text = "";
-            debugText.text = "Out of vocal range";
+            debugText.text =
+                $"Out of vocal range\n" +
+                $"Pitch: {currentPitch:F2}";
+
             return;
         }
 
-        DisplayPitch(frequency);
+        // MOSTRAR RESULTADO
+        DisplayPitch(currentPitch);
 
-        debugText.text = $"RMS: {rms:F4}";
+        debugText.text =
+            $"Pitch: {currentPitch:F2} Hz\n" +
+            $"Detected: {detectedPitch:F2}\n" +
+            $"RMS: {rms:F4}";
     }
-
     float CalculateRMS(float[] data)
     {
         float sum = 0f;
 
         for (int i = 0; i < data.Length; i++)
+        {
             sum += data[i] * data[i];
+        }
 
         return Mathf.Sqrt(sum / data.Length);
     }
 
     float DetectPitch(float[] data, int rate)
     {
-        int maxShift = data.Length / 2;
+        int minFreq = 70;
+        int maxFreq = 1000;
+
+        int minLag = rate / maxFreq;
+        int maxLag = rate / minFreq;
 
         float bestCorrelation = 0f;
         int bestLag = -1;
 
-        for (int lag = 20; lag < maxShift; lag++)
+        for (int lag = minLag; lag < maxLag; lag++)
         {
             float correlation = 0f;
 
-            for (int i = 0; i < maxShift; i++)
+            for (int i = 0; i < data.Length - lag; i++)
             {
-                correlation += data[i] * data[i + lag];
+                correlation +=
+                    data[i] * data[i + lag];
             }
 
             if (correlation > bestCorrelation)
@@ -140,33 +187,50 @@ public class VocalPitchDetector : MonoBehaviour
         }
 
         if (bestLag == -1)
-            return -1;
+            return -1f;
 
-        float frequency = (float)rate / bestLag;
+        // if (bestCorrelation < clarityThreshold)
+        //     return -1f;
 
-        return frequency;
+        return (float)rate / bestLag;
     }
 
     void DisplayPitch(float frequency)
     {
         float midi =
-            69 + 12 * Mathf.Log(frequency / 440f, 2);
+            69 + 12 *
+            Mathf.Log(frequency / 440f, 2);
 
-        int roundedMidi = Mathf.RoundToInt(midi);
+        int roundedMidi =
+            Mathf.RoundToInt(midi);
 
-        int noteIndex = roundedMidi % 12;
-        int octave = (roundedMidi / 12) - 1;
+        int noteIndex =
+            roundedMidi % 12;
 
-        string noteName = noteNames[noteIndex];
+        int octave =
+            (roundedMidi / 12) - 1;
+
+        string noteName =
+            noteNames[noteIndex];
 
         float noteFreq =
-            440f * Mathf.Pow(2f, (roundedMidi - 69) / 12f);
+            440f * Mathf.Pow(
+                2f,
+                (roundedMidi - 69) / 12f);
 
         float cents =
-            1200f * Mathf.Log(frequency / noteFreq, 2);
+            1200f *
+            Mathf.Log(
+                frequency / noteFreq,
+                2);
 
-        noteText.text = $"{noteName}{octave}";
-        freqText.text = $"{frequency:F2} Hz";
-        centsText.text = $"{cents:+0;-0} cents";
+        noteText.text =
+            $"{noteName}{octave}";
+
+        freqText.text =
+            $"{frequency:F2} Hz";
+
+        centsText.text =
+            $"{cents:+0;-0} cents";
     }
 }
