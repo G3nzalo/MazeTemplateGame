@@ -1,0 +1,8 @@
+{
+  "on_save": [
+    "analyze_unity_architecture"
+  ],
+  "on_error": [
+    "explain_unity_error"
+  ]
+}

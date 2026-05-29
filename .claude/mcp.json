@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "unity": {
+      "command": "node",
+      "args": ["unity-mcp-server.js"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["fs-mcp"]
+    }
+  }
+}
