@@ -50,8 +50,24 @@ public class VocalPitchDetector : MonoBehaviour
 
     IEnumerator InitMic()
     {
-        yield return Application.RequestUserAuthorization(
-            UserAuthorization.Microphone);
+        yield return null;
+
+#if UNITY_ANDROID
+        if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(
+            UnityEngine.Android.Permission.Microphone))
+        {
+            UnityEngine.Android.Permission.RequestUserPermission(
+                UnityEngine.Android.Permission.Microphone);
+        }
+
+        while (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(
+            UnityEngine.Android.Permission.Microphone))
+        {
+            yield return null;
+        }
+#endif
+
+        yield return new WaitForSeconds(0.2f);
 
         if (Microphone.devices.Length == 0)
         {
@@ -60,6 +76,9 @@ public class VocalPitchDetector : MonoBehaviour
         }
 
         micDevice = Microphone.devices[0];
+
+        // 🔥 importante en Android
+        Microphone.End(micDevice);
 
         micClip = Microphone.Start(
             micDevice,

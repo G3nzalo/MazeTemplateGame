@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcf33dee560ae488ab217c29377cb20a, type: 3}
   m_Name: Level1
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  bpm: 130
+  bpm: 75
   notes:
   - isRest: 0
     note: 0
