@@ -3186,7 +3186,7 @@ GameObject:
   - component: {fileID: 852545958}
   - component: {fileID: 852545960}
   m_Layer: 5
-  m_Name: panel debug
+  m_Name: Panel Afinacion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3261,7 +3261,7 @@ MonoBehaviour:
   detector: {fileID: 764494216}
   graphImage: {fileID: 852545958}
   resultBar: {fileID: 1011597182}
-  resultText: {fileID: 0}
+  resultText: {fileID: 1215271451}
   texWidth: 256
   texHeight: 96
   centsRange: 50
