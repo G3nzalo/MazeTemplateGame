@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
 namespace Maze.Tools
 {
@@ -10,15 +11,28 @@ namespace Maze.Tools
     {
         [SerializeField] private AudioMixer mixer;
         [SerializeField] private List<SoundEntry> soundsSources;
-        [SerializeField] private float musicStandardDB;
+
+        [Tooltip("Volumen objetivo (lineal 0-1) al que sube el fade-in.")]
+        [FormerlySerializedAs("musicStandardDB")]
+        [Range(0f, 1f)]
+        [SerializeField] private float musicStandardVolume = 1f;
 
         private Dictionary<string, AudioSource> soundsDictionary = new Dictionary<string, AudioSource>();
+
+        // Evita que varios fades peleen por el volumen del mismo source.
+        private readonly Dictionary<AudioSource, Coroutine> fadeRoutines = new Dictionary<AudioSource, Coroutine>();
 
         protected override void Awake()
         {
             base.Awake();
             foreach (var sound in soundsSources)
             {
+                if (soundsDictionary.ContainsKey(sound.name))
+                {
+                    Debug.LogWarning("Duplicate sound id ignored: " + sound.name);
+                    continue;
+                }
+
                 soundsDictionary.Add(sound.name, sound.source);
             }
         }
@@ -44,39 +58,25 @@ namespace Maze.Tools
 
         public void PlaySound(string soundId)
         {
-            if (!soundsDictionary.ContainsKey(soundId))
+            if (!soundsDictionary.TryGetValue(soundId, out AudioSource source))
             {
                 Debug.LogError("Sound with id " + soundId + " not found");
                 return;
             }
 
-            if (soundsDictionary[soundId].isPlaying)
+            // Comportamiento toggle: si ya suena, hace fade-out; si no, fade-in.
+            if (source.isPlaying)
             {
-                StartCoroutine(FadeOut(soundsDictionary[soundId], 1));
+                StartFade(source, FadeOut(source, 1));
                 return;
             }
 
-            PlayNextSound(soundsDictionary[soundId]);
+            StartFade(source, FadeIn(source, 1));
         }
 
         public void SetMusicVolume(float volume, bool valueOnDb = false)
         {
-            float dB = 0;
-            if (!valueOnDb)
-            {
-                if (volume != 0)
-                {
-                    dB = 20.0f * Mathf.Log10(volume);
-                }
-                else
-                {
-                    dB = -144.0f;
-                }
-            }
-            else
-            {
-                dB = volume;
-            }
+            float dB = valueOnDb ? volume : LinearToDb(volume);
             mixer.SetFloat("MusicVolume", dB);
         }
 
@@ -93,32 +93,29 @@ namespace Maze.Tools
 
         public void SetSoundsEffectsVolume(float volume, bool valueOnDb = false)
         {
-            float dB = 0;
-            if (!valueOnDb)
-            {
-                if (volume != 0)
-                {
-                    dB = 20.0f * Mathf.Log10(volume);
-                }
-                else
-                {
-                    dB = -144.0f;
-                }
-            }
-            else
-            {
-                dB = volume;
-            }
+            float dB = valueOnDb ? volume : LinearToDb(volume);
             mixer.SetFloat("SoundEffectsVolume", dB);
         }
 
-        private void PlayNextSound(AudioSource currentSource)
+        // Convierte un volumen lineal (0-1) a decibelios para el mixer.
+        private static float LinearToDb(float volume)
         {
-            StartCoroutine(FadeIn(currentSource));
+            return volume > 0f ? 20f * Mathf.Log10(volume) : -144f;
+        }
+
+        // Cancela cualquier fade en curso sobre este source antes de iniciar otro.
+        private void StartFade(AudioSource source, IEnumerator routine)
+        {
+            if (fadeRoutines.TryGetValue(source, out Coroutine running) && running != null)
+                StopCoroutine(running);
+
+            fadeRoutines[source] = StartCoroutine(routine);
         }
 
         private IEnumerator FadeIn(AudioSource audioSource, float fadeDuration = 1)
         {
+            float target = Mathf.Clamp01(musicStandardVolume);
+
             audioSource.volume = 0f;
             audioSource.Play();
             float timer = 0f;
@@ -126,17 +123,18 @@ namespace Maze.Tools
             while (timer < fadeDuration)
             {
                 timer += Time.deltaTime;
-                audioSource.volume = Mathf.Lerp(0f, musicStandardDB, timer / fadeDuration);
+                audioSource.volume = Mathf.Lerp(0f, target, timer / fadeDuration);
                 yield return null;
             }
 
-            audioSource.volume = musicStandardDB;
+            audioSource.volume = target;
         }
 
 
         private IEnumerator FadeOut(AudioSource audioSource, float fadeDuration = 1)
         {
-            float startVolume = GetMuiscVolume();
+            // Parte del volumen real del source (lineal), no del dB del mixer.
+            float startVolume = audioSource.volume;
 
             float timer = 0f;
 
@@ -148,6 +146,7 @@ namespace Maze.Tools
             }
 
             audioSource.volume = 0f;
+            audioSource.Stop();
         }
 
 

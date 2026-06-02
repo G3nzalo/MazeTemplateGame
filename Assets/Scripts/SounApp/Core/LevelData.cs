@@ -10,11 +10,16 @@ public class LevelData : ScriptableObject
 
     [Header("Difficulty")]
 
-    [Tooltip("Porcentaje máximo permitido de error")]
-    [Range(0f, 10f)]
-    public float pitchTolerancePercent = 2f;
+    [Tooltip("Tolerancia de afinación en cents respecto a la nota objetivo. " +
+             "±10 = exigente (spec), valores mayores = más fácil.")]
+    [Range(5f, 50f)]
+    public float tuningToleranceCents = 10f;
 
-    [Tooltip("Porcentaje necesario para aprobar")]
+    [Tooltip("Porcentaje de frames dentro de tolerancia para dar UNA nota por afinada (spec: >70%).")]
+    [Range(0f, 100f)]
+    public float perNoteTuningPercent = 70f;
+
+    [Tooltip("Porcentaje de notas correctas para aprobar el NIVEL completo.")]
     [Range(0f, 100f)]
     public float passPercentage = 85f;
 }

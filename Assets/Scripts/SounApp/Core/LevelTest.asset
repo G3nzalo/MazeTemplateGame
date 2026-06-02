@@ -21,13 +21,11 @@ MonoBehaviour:
     note: 1
     duration: 0
   - isRest: 0
-    note: 2
+    note: 0
     duration: 0
   - isRest: 0
-    note: 3
+    note: 1
     duration: 0
-  - isRest: 0
-    note: 4
-    duration: 0
-  pitchTolerancePercent: 2
+  tuningToleranceCents: 31
+  perNoteTuningPercent: 70
   passPercentage: 80

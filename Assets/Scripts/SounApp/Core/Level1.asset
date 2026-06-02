@@ -518,5 +518,6 @@ MonoBehaviour:
   - isRest: 0
     note: 0
     duration: 0
-  pitchTolerancePercent: 2
+  tuningToleranceCents: 10
+  perNoteTuningPercent: 70
   passPercentage: 85
