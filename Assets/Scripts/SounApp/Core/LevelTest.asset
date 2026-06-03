@@ -26,6 +26,6 @@ MonoBehaviour:
   - isRest: 0
     note: 1
     duration: 0
-  tuningToleranceCents: 31
-  perNoteTuningPercent: 70
+  tuningToleranceCents: 25
+  perNoteTuningPercent: 20
   passPercentage: 80

@@ -177,6 +177,7 @@ public class VocalPitchDetector : MonoBehaviour
         micReady = true;
 
         if (debugText) debugText.text = $"Mic Ready @ {actualSampleRate} Hz";
+        Debug.Log($"[VocalPitchDetector] Sample rate real del dispositivo: {actualSampleRate} Hz");
     }
 
     void Update()
