@@ -8,7 +8,15 @@ public class GameAudioManager : MonoBehaviour
     public static GameAudioManager Instance;
 
     [Header("References")]
-    public LevelData levelData;
+    [Tooltip("Lista ordenada de niveles. El botón 'Siguiente Nivel' avanza por aquí.")]
+    public List<LevelData> levels = new List<LevelData>();
+
+    [Tooltip("Índice del nivel con el que se arranca dentro de 'levels'.")]
+    public int currentLevelIndex = 0;
+
+    // Nivel actualmente en juego. Se deriva de levels[currentLevelIndex];
+    // no se asigna en el Inspector.
+    private LevelData levelData;
 
     public BirdControllerMov bird;
 
@@ -43,6 +51,22 @@ public class GameAudioManager : MonoBehaviour
 
     private const string OctavePrefKey = "SounApp.OctaveOffset";
 
+    [Header("Tempo")]
+    [Tooltip("Límite inferior de BPM que el jugador puede fijar con los botones +/-.")]
+    [Range(20, 240)]
+    public int minBpm = 40;
+
+    [Tooltip("Límite superior de BPM que el jugador puede fijar con los botones +/-.")]
+    [Range(20, 240)]
+    public int maxBpm = 200;
+
+    [Tooltip("Cuánto sube/baja el BPM por cada pulsación del botón +/-.")]
+    public int bpmStep = 5;
+
+    public int Bpm => levelData != null ? levelData.bpm : 0;
+
+    private const string BpmPrefKey = "SounApp.Bpm";
+
     [Header("Evaluation")]
     [Tooltip("Tiempo inicial de la nota que se ignora (ataque vocal).")]
     public float attackIgnoreTime = 0.15f;
@@ -60,8 +84,20 @@ public class GameAudioManager : MonoBehaviour
     {
         Instance = this;
 
+        // Si hay lista de niveles, el nivel actual sale de ahí.
+        ApplyCurrentLevel();
+
         // Recupera la octava elegida por el jugador en sesiones anteriores.
         octaveOffset = PlayerPrefs.GetInt(OctavePrefKey, octaveOffset);
+
+        // Recupera el BPM elegido por el jugador (por defecto, el del nivel).
+        if (levelData != null)
+        {
+            levelData.bpm = Mathf.Clamp(
+                PlayerPrefs.GetInt(BpmPrefKey, levelData.bpm),
+                minBpm,
+                maxBpm);
+        }
     }
 
     // Fija la octava del jugador (voz grave/aguda). Se ignora durante el entrenamiento.
@@ -76,6 +112,25 @@ public class GameAudioManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    // Fija el BPM del nivel (tempo). Se ignora durante un entrenamiento EN CURSO,
+    // igual que la octava. Queda persistido entre sesiones.
+    public void SetBpm(int bpm)
+    {
+        if (levelRunning || levelData == null)
+            return;
+
+        levelData.bpm = Mathf.Clamp(bpm, minBpm, maxBpm);
+
+        PlayerPrefs.SetInt(BpmPrefKey, levelData.bpm);
+        PlayerPrefs.Save();
+    }
+
+    // Sube/baja el BPM en 'delta' (positivo o negativo). Para los botones +/-.
+    public void ChangeBpm(int delta)
+    {
+        SetBpm(Bpm + delta);
+    }
+
     public void StartTraining()
     {
         if (levelRunning)
@@ -87,7 +142,19 @@ public class GameAudioManager : MonoBehaviour
     IEnumerator LevelRoutine()
     {
         levelRunning = true;
-        DebugAudio.Instance.Clear();
+
+        if (DebugAudio.Instance == null)
+        {
+            Debug.LogError(
+                "DebugAudio.Instance es null. El componente DebugAudio debe estar " +
+                "en un GameObject SIEMPRE activo (no en el PanelPopUpResult apagado). " +
+                "Dejá el panel activo en escena y asignalo en el campo 'panelPopUpResult'.");
+        }
+        else
+        {
+            DebugAudio.Instance.Hide();
+            DebugAudio.Instance.Clear();
+        }
 
         currentState =
             GameAudioState.Training;
@@ -155,8 +222,8 @@ public class GameAudioManager : MonoBehaviour
         float targetFreq = pitchEvaluator.MidiToFrequency(targetMidi);
 
         // Prepara el gráfico de afinación para esta nota.
-        if (feedbackUI != null)
-            feedbackUI.BeginNote(targetFreq, levelData.tuningToleranceCents);
+        // if (feedbackUI != null)
+        //     feedbackUI.BeginNote(targetFreq, levelData.tuningToleranceCents);
 
         // Captura frames CRUDOS de F0 por hop (independiente del frame rate).
         pitchDetector.BeginCapture();
@@ -178,6 +245,9 @@ public class GameAudioManager : MonoBehaviour
             lastDetectedNote = "NONE";
             if (feedbackUI != null)
                 feedbackUI.ShowResult(0f, levelData.perNoteTuningPercent);
+
+            // Sin sonido detectado = error: se lista en el scroll.
+            DebugAudio.Instance.AddError($"{targetNote} → sin sonido detectado");
             yield break;
         }
 
@@ -209,11 +279,10 @@ public class GameAudioManager : MonoBehaviour
 
         string result = currentEvaluationResult ? "OK" : "FAIL";
 
-        // DEBUG UI PANEL
-        DebugAudio.Instance.AddLine(
-            $"{targetNote} → {lastDetectedNote} | " +
-            $"{tuningPercent:F1}% | {result}"
-        );
+        // SCROLL DE ERRORES: solo las notas falladas.
+        if (!currentEvaluationResult)
+            DebugAudio.Instance.AddError(
+                $"{targetNote} → cantaste {lastDetectedNote} ({tuningPercent:F0}%)");
 
         // DEBUG CONSOLE
         Debug.Log(
@@ -248,18 +317,65 @@ public class GameAudioManager : MonoBehaviour
             scoreSystem.Passed(
                 levelData.passPercentage);
 
-        DebugAudio.Instance.AddLine("");
-        DebugAudio.Instance.AddLine("===== RESULT =====");
+        bool hasNextLevel = HasNextLevel();
 
-        DebugAudio.Instance.AddLine(
-        $"Accuracy: {accuracy:F1}%");
+        // Enciende el popup de resultado con título, % de aciertos y errores.
+        DebugAudio.Instance.ShowResult(passed, accuracy, hasNextLevel);
 
-        DebugAudio.Instance.AddLine(
-        passed ? "LEVEL PASSED" : "LEVEL FAILED");
+        // El botón pasa al siguiente nivel (si pasó y existe) o reintenta.
+        DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
+
+        if (passed && hasNextLevel)
+            DebugAudio.Instance.nextBtn.onClick.AddListener(LoadNextLevel);
+        else
+            DebugAudio.Instance.nextBtn.onClick.AddListener(RetryLevel);
 
         uiManager.UnlockAll();
 
         levelRunning = false;
+    }
+
+    // ¿Existe un nivel posterior al actual en la lista?
+    bool HasNextLevel()
+    {
+        return levels != null
+            && currentLevelIndex < levels.Count - 1;
+    }
+
+    // Fija 'levelData' según el índice actual dentro de 'levels' (si hay lista).
+    void ApplyCurrentLevel()
+    {
+        if (levels == null || levels.Count == 0)
+        {
+            Debug.LogError(
+                "GameAudioManager: la lista 'levels' está vacía. Asigná al menos " +
+                "un LevelData en el Inspector.");
+            return;
+        }
+
+        currentLevelIndex = Mathf.Clamp(currentLevelIndex, 0, levels.Count - 1);
+        levelData = levels[currentLevelIndex];
+    }
+
+    // Botón "Siguiente Nivel": avanza al próximo nivel y arranca el entrenamiento.
+    public void LoadNextLevel()
+    {
+        DebugAudio.Instance.Hide();
+
+        if (HasNextLevel())
+        {
+            currentLevelIndex++;
+            ApplyCurrentLevel();
+        }
+
+        StartTraining();
+    }
+
+    // Botón "Reintentar": vuelve a empezar el mismo nivel.
+    public void RetryLevel()
+    {
+        DebugAudio.Instance.Hide();
+        StartTraining();
     }
 
     float GetDuration(NoteLength length)
