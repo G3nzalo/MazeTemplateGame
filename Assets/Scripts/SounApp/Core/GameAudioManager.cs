@@ -63,9 +63,19 @@ public class GameAudioManager : MonoBehaviour
     [Tooltip("Cuánto sube/baja el BPM por cada pulsación del botón +/-.")]
     public int bpmStep = 5;
 
-    public int Bpm => levelData != null ? levelData.bpm : 0;
+    [Tooltip("Duración (segundos) de la transición de vuelo entre notas. Es una " +
+             "transición CORTA: se acota a una fracción de la negra para no romper " +
+             "el tempo en notas rápidas. El vuelo + el canto juntos duran una negra, " +
+             "así el onset de cada nota cae justo en el pulso elegido.")]
+    public float noteTransitionTime = 0.15f;
 
-    private const string BpmPrefKey = "SounApp.Bpm";
+    // Tempo VIGENTE del juego, en memoria. Es la única fuente de verdad tanto
+    // para el display como para la duración de cada nota. Se inicializa con el
+    // BPM del nivel y se modifica con los botones +/-. NO se persiste (no se
+    // guarda en PlayerPrefs) ni se escribe sobre el asset del nivel.
+    private int currentBpm;
+
+    public int Bpm => currentBpm;
 
     [Header("Evaluation")]
     [Tooltip("Tiempo inicial de la nota que se ignora (ataque vocal).")]
@@ -90,14 +100,10 @@ public class GameAudioManager : MonoBehaviour
         // Recupera la octava elegida por el jugador en sesiones anteriores.
         octaveOffset = PlayerPrefs.GetInt(OctavePrefKey, octaveOffset);
 
-        // Recupera el BPM elegido por el jugador (por defecto, el del nivel).
+        // Tempo inicial = el del nivel de arranque. NO se lee de PlayerPrefs:
+        // el jugador lo ajusta en cada sesión y no queda persistido.
         if (levelData != null)
-        {
-            levelData.bpm = Mathf.Clamp(
-                PlayerPrefs.GetInt(BpmPrefKey, levelData.bpm),
-                minBpm,
-                maxBpm);
-        }
+            currentBpm = Mathf.Clamp(levelData.bpm, minBpm, maxBpm);
     }
 
     // Fija la octava del jugador (voz grave/aguda). Se ignora durante el entrenamiento.
@@ -112,17 +118,14 @@ public class GameAudioManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // Fija el BPM del nivel (tempo). Se ignora durante un entrenamiento EN CURSO,
-    // igual que la octava. Queda persistido entre sesiones.
+    // Fija el tempo (BPM) vigente del juego. Se ignora durante un entrenamiento
+    // EN CURSO, igual que la octava. NO se persiste: vale solo para esta sesión.
     public void SetBpm(int bpm)
     {
-        if (levelRunning || levelData == null)
+        if (levelRunning)
             return;
 
-        levelData.bpm = Mathf.Clamp(bpm, minBpm, maxBpm);
-
-        PlayerPrefs.SetInt(BpmPrefKey, levelData.bpm);
-        PlayerPrefs.Save();
+        currentBpm = Mathf.Clamp(bpm, minBpm, maxBpm);
     }
 
     // Sube/baja el BPM en 'delta' (positivo o negativo). Para los botones +/-.
@@ -185,20 +188,22 @@ public class GameAudioManager : MonoBehaviour
             float duration =
                 GetDuration(note.duration);
 
-            yield return StartCoroutine(
-                bird.FlyTo(
-                    visualIndex,
-                    duration));
+            // Reparto del pulso: el vuelo es una transición CORTA y el canto
+            // ocupa el resto. vuelo + canto = la negra, así el onset de cada
+            // nota cae justo en el beat y el nivel va al tempo elegido.
+            float flightTime =
+                Mathf.Min(noteTransitionTime, duration * 0.35f);
+            float singTime = duration - flightTime;
 
-            // Audio de referencia (p.ej. "Nota Do") al LLEGAR a la nota, antes
-            // de evaluar. Suena con la captura aún apagada para no contaminar el mic.
+            // Vuela rápido a la nota mientras suena la referencia con fade out
+            // (no agrega tiempo al pulso). La captura del mic sigue apagada.
             yield return StartCoroutine(
-                PlayReferenceIfAny(note.note));
+                FlyAndCue(visualIndex, flightTime, note.note));
 
             yield return StartCoroutine(
                 EvaluatePlayerPitch(
                     note.note,
-                    duration));
+                    singTime));
 
             bool success =
                 currentEvaluationResult;
@@ -246,8 +251,8 @@ public class GameAudioManager : MonoBehaviour
             if (feedbackUI != null)
                 feedbackUI.ShowResult(0f, levelData.perNoteTuningPercent);
 
-            // Sin sonido detectado = error: se lista en el scroll.
-            DebugAudio.Instance.AddError($"{targetNote} → sin sonido detectado");
+            // No se captó voz para esta nota = error: se lista en el scroll.
+            DebugAudio.Instance.AddError($"{targetNote} → no llegaste a esa nota.");
             yield break;
         }
 
@@ -381,7 +386,7 @@ public class GameAudioManager : MonoBehaviour
     float GetDuration(NoteLength length)
     {
         float quarter =
-            60f / levelData.bpm;
+            60f / currentBpm;
 
         switch (length)
         {
@@ -416,26 +421,50 @@ public class GameAudioManager : MonoBehaviour
         return 0;
     }
 
-    // Reproduce el audio de referencia de la nota (si está asignado) y espera a
-    // que termine. Reutiliza el AudioSource del botón correspondiente (ej. btnNotaDo).
-    IEnumerator PlayReferenceIfAny(NoteName note)
+    // Vuela rápido a la nota y, en paralelo, lanza el audio de referencia con un
+    // fade out que termina junto con el vuelo: así la referencia no agrega tiempo
+    // al pulso. La captura del mic sigue apagada durante esta fase.
+    IEnumerator FlyAndCue(int visualIndex, float flightTime, NoteName note)
     {
-        if (!playReferenceBeforeNote)
-            yield break;
+        Coroutine cue = playReferenceBeforeNote
+            ? StartCoroutine(PlayReferenceWithFade(note, flightTime))
+            : null;
 
+        yield return StartCoroutine(bird.FlyTo(visualIndex, flightTime));
+
+        // Asegura que el fade terminó y el audio se detuvo antes de evaluar.
+        if (cue != null)
+            yield return cue;
+    }
+
+    // Reproduce la referencia (p.ej. "Nota Do") transpuesta a la octava del
+    // jugador y la apaga con un fade out a lo largo de 'fadeTime', para que no
+    // coma tiempo del compás ni de la negra. Restaura pitch/volumen del source.
+    IEnumerator PlayReferenceWithFade(NoteName note, float fadeTime)
+    {
         AudioSource source = GetReferenceSource(note);
         if (source == null)
             yield break;
 
-        // Transpone la referencia a la octava del jugador (pitch=2 → +1 octava)
-        // y restaura el pitch original al terminar para no afectar al botón.
         float originalPitch = source.pitch;
+        float originalVolume = source.volume;
+
         source.pitch = Mathf.Pow(2f, octaveOffset);
-
+        source.volume = originalVolume;
         source.Play();
-        yield return new WaitWhile(() => source.isPlaying);
 
+        float t = 0f;
+        while (t < fadeTime)
+        {
+            t += Time.deltaTime;
+            source.volume =
+                Mathf.Lerp(originalVolume, 0f, Mathf.Clamp01(t / fadeTime));
+            yield return null;
+        }
+
+        source.Stop();
         source.pitch = originalPitch;
+        source.volume = originalVolume;
     }
 
     AudioSource GetReferenceSource(NoteName note)

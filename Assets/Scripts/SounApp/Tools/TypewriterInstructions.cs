@@ -129,8 +129,13 @@ public class TypewriterInstructions : MonoBehaviour
         {
             string path = System.IO.Path.Combine(Application.streamingAssetsPath, jsonFileName + ".json");
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-            StartCoroutine(LoadJSONWebGL(path));
+            // En Android y WebGL, StreamingAssets vive dentro del APK/servidor comprimido
+            // y NO se puede leer con System.IO. Hay que usar UnityWebRequest.
+#if UNITY_ANDROID && !UNITY_EDITOR
+            StartCoroutine(LoadJSONFromUWR(path));
+            return;
+#elif UNITY_WEBGL && !UNITY_EDITOR
+            StartCoroutine(LoadJSONFromUWR(path));
             return;
 #else
             if (!System.IO.File.Exists(path))
@@ -162,14 +167,16 @@ public class TypewriterInstructions : MonoBehaviour
         ShowSlide(currentIndex);
     }
 
-    private IEnumerator LoadJSONWebGL(string url)
+    // Carga vía UnityWebRequest para plataformas donde StreamingAssets no es accesible
+    // por System.IO (Android: dentro del APK; WebGL: servido por HTTP).
+    private IEnumerator LoadJSONFromUWR(string url)
     {
         using (var req = UnityEngine.Networking.UnityWebRequest.Get(url))
         {
             yield return req.SendWebRequest();
             if (req.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
             {
-                Debug.LogError($"[Typewriter] Error WebGL: {req.error}");
+                Debug.LogError($"[Typewriter] Error cargando JSON desde '{url}': {req.error}");
                 yield break;
             }
             ParseAndStart(req.downloadHandler.text);

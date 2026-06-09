@@ -1,3 +1,5 @@
 # ninja log v5
-0	125	1779773203433425709	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	b3aac816b4a558a1
 126	230	1779773203508285189	/Users/gonzaloocampo/Desktop/Programacion/MazeTemplateGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/4u2l3p3l/obj/armeabi-v7a/libswappywrapper.so	2190eb3ba979f661
+0	125	1779773203433425709	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	b3aac816b4a558a1
+0	112	1780967315145709745	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	b3aac816b4a558a1
+112	200	1780967315220686467	/Users/gonzaloocampo/Desktop/Programacion/MazeTemplateGame/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/4u2l3p3l/obj/armeabi-v7a/libswappywrapper.so	2190eb3ba979f661

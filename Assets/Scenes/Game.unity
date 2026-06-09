@@ -302,7 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -422,8 +422,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.0022659, y: 0.00086688995}
-  m_SizeDelta: {x: 1079.1, y: 290.88}
+  m_AnchoredPosition: {x: 0.0022659, y: -8.1623}
+  m_SizeDelta: {x: 1079.1, y: 195.0754}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &109589385
 MonoBehaviour:
@@ -499,7 +499,7 @@ MonoBehaviour:
   m_text: 'Errores:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
-  m_sharedMaterial: {fileID: 2488148217374799466, guid: 88f141fdd9217411a9f6bc86ae766aa5, type: 2}
+  m_sharedMaterial: {fileID: 7665907848553863926, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3404,16 +3404,13 @@ MonoBehaviour:
   scoreSystem: {fileID: 764494218}
   uiManager: {fileID: 751869729}
   feedbackUI: {fileID: 852545960}
-  referenceAudios:
-  - note: 0
-    source: {fileID: 198089903}
-  - note: 7
-    source: {fileID: 198089903}
+  referenceAudios: []
   playReferenceBeforeNote: 1
   octaveOffset: 0
   minBpm: 40
   maxBpm: 200
   bpmStep: 5
+  noteTransitionTime: 0.15
   attackIgnoreTime: 0.15
   currentState: 0
 --- !u!114 &764494218
@@ -3956,7 +3953,7 @@ MonoBehaviour:
   m_text: Nivel Superado!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
-  m_sharedMaterial: {fileID: 2488148217374799466, guid: 88f141fdd9217411a9f6bc86ae766aa5, type: 2}
+  m_sharedMaterial: {fileID: 7665907848553863926, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -9698,7 +9695,7 @@ MonoBehaviour:
   m_text: 90% de notas cantadas
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
-  m_sharedMaterial: {fileID: 2488148217374799466, guid: 88f141fdd9217411a9f6bc86ae766aa5, type: 2}
+  m_sharedMaterial: {fileID: 7665907848553863926, guid: 56ad08665ca124fd888acc1e118b184b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

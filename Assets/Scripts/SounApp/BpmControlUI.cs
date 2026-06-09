@@ -7,7 +7,7 @@ using TMPro;
 // Uso: asignar dos botones (+ / -) y un TMP_Text donde se muestra el BPM actual.
 //   - Cada pulsación cambia el BPM en GameAudioManager.bpmStep, con clamp
 //     entre minBpm y maxBpm.
-//   - El BPM queda persistido entre sesiones (PlayerPrefs).
+//   - El BPM NO se persiste: vale solo para la sesión actual.
 //   - Los cambios se ignoran mientras un entrenamiento está EN CURSO (igual que
 //     la octava), pero el display sigue mostrando el valor vigente.
 public class BpmControlUI : MonoBehaviour
