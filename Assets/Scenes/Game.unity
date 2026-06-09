@@ -3397,6 +3397,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7432365705fbd4d4d95fcfca862f54e1, type: 2}
   - {fileID: 11400000, guid: 16288ad821e644df79bed3b7f25c50a4, type: 2}
   - {fileID: 11400000, guid: 0f442d8a21a894cb6989df3914facf24, type: 2}
+  - {fileID: 11400000, guid: 298e06844c7aa4305b6e8b0c80ca0195, type: 2}
+  - {fileID: 11400000, guid: f82dfdd88329a43918c97e2f314a7f13, type: 2}
+  - {fileID: 11400000, guid: 61907edb5f2e347b6b4950671cdb1388, type: 2}
+  - {fileID: 11400000, guid: c5705ede31f0a4dd886e657d8b86b0dd, type: 2}
   currentLevelIndex: 0
   bird: {fileID: 1756765541}
   pitchDetector: {fileID: 764494216}
@@ -3404,7 +3408,9 @@ MonoBehaviour:
   scoreSystem: {fileID: 764494218}
   uiManager: {fileID: 751869729}
   feedbackUI: {fileID: 852545960}
-  referenceAudios: []
+  referenceAudios:
+  - note: 0
+    source: {fileID: 198089903}
   playReferenceBeforeNote: 1
   octaveOffset: 0
   minBpm: 40
