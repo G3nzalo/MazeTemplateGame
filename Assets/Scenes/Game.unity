@@ -3408,9 +3408,7 @@ MonoBehaviour:
   scoreSystem: {fileID: 764494218}
   uiManager: {fileID: 751869729}
   feedbackUI: {fileID: 852545960}
-  referenceAudios:
-  - note: 0
-    source: {fileID: 198089903}
+  referenceAudios: []
   playReferenceBeforeNote: 1
   octaveOffset: 0
   minBpm: 40
