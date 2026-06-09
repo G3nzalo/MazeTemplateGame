@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fcf33dee560ae488ab217c29377cb20a, type: 3}
-  m_Name: Level1
+  m_Name: Level1_c
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   bpm: 75
   notes:
@@ -27,10 +27,7 @@ MonoBehaviour:
     note: 1
     duration: 0
   - isRest: 0
-    note: 0
-    duration: 0
-  - isRest: 1
-    note: 0
+    note: 1
     duration: 0
   - isRest: 0
     note: 0
@@ -48,7 +45,7 @@ MonoBehaviour:
     note: 2
     duration: 0
   - isRest: 0
-    note: 1
+    note: 2
     duration: 0
   - isRest: 0
     note: 0
@@ -75,10 +72,7 @@ MonoBehaviour:
     note: 3
     duration: 0
   - isRest: 0
-    note: 2
-    duration: 0
-  - isRest: 0
-    note: 1
+    note: 3
     duration: 0
   - isRest: 0
     note: 0
@@ -108,13 +102,7 @@ MonoBehaviour:
     note: 4
     duration: 0
   - isRest: 0
-    note: 3
-    duration: 0
-  - isRest: 0
-    note: 2
-    duration: 0
-  - isRest: 0
-    note: 1
+    note: 4
     duration: 0
   - isRest: 0
     note: 0
@@ -147,16 +135,7 @@ MonoBehaviour:
     note: 5
     duration: 0
   - isRest: 0
-    note: 4
-    duration: 0
-  - isRest: 0
-    note: 3
-    duration: 0
-  - isRest: 0
-    note: 2
-    duration: 0
-  - isRest: 0
-    note: 1
+    note: 5
     duration: 0
   - isRest: 0
     note: 0
@@ -192,19 +171,7 @@ MonoBehaviour:
     note: 6
     duration: 0
   - isRest: 0
-    note: 5
-    duration: 0
-  - isRest: 0
-    note: 4
-    duration: 0
-  - isRest: 0
-    note: 3
-    duration: 0
-  - isRest: 0
-    note: 2
-    duration: 0
-  - isRest: 0
-    note: 1
+    note: 6
     duration: 0
   - isRest: 0
     note: 0
@@ -243,22 +210,7 @@ MonoBehaviour:
     note: 7
     duration: 0
   - isRest: 0
-    note: 6
-    duration: 0
-  - isRest: 0
-    note: 5
-    duration: 0
-  - isRest: 0
-    note: 4
-    duration: 0
-  - isRest: 0
-    note: 3
-    duration: 0
-  - isRest: 0
-    note: 2
-    duration: 0
-  - isRest: 0
-    note: 1
+    note: 7
     duration: 0
   - isRest: 0
     note: 0

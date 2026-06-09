@@ -3392,10 +3392,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1d246c6491044d6ae944074a83e88e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameAudioManager
-  levelData: {fileID: 11400000, guid: b04b7c7238bd1475983d7e136083f2f9, type: 2}
   levels:
-  - {fileID: 11400000, guid: b04b7c7238bd1475983d7e136083f2f9, type: 2}
-  - {fileID: 11400000, guid: b04b7c7238bd1475983d7e136083f2f9, type: 2}
+  - {fileID: 11400000, guid: 9b2bc2970c65746d4bad3d8ae5566620, type: 2}
+  - {fileID: 11400000, guid: 7432365705fbd4d4d95fcfca862f54e1, type: 2}
+  - {fileID: 11400000, guid: 16288ad821e644df79bed3b7f25c50a4, type: 2}
+  - {fileID: 11400000, guid: 0f442d8a21a894cb6989df3914facf24, type: 2}
   currentLevelIndex: 0
   bird: {fileID: 1756765541}
   pitchDetector: {fileID: 764494216}
