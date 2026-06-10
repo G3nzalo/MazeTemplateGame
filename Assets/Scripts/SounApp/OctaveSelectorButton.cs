@@ -11,7 +11,7 @@ using TMPro;
 //
 // El jugador puede cambiar de octava LIBREMENTE en cualquier momento entre
 // ejercicios; solo se ignora el cambio mientras un entrenamiento está en curso.
-// La elección se persiste entre sesiones (PlayerPrefs).
+// La elección NO se persiste: vale solo para la sesión actual (igual que el BPM).
 public class OctaveSelectorButton : MonoBehaviour
 {
     public Button button;

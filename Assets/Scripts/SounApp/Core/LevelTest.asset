@@ -18,7 +18,13 @@ MonoBehaviour:
     note: 0
     duration: 0
   - isRest: 0
+    note: 4
+    duration: 0
+  - isRest: 0
     note: 7
+    duration: 0
+  - isRest: 0
+    note: 4
     duration: 0
   tuningToleranceCents: 25
   perNoteTuningPercent: 20

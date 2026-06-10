@@ -49,8 +49,6 @@ public class GameAudioManager : MonoBehaviour
     public int OctaveOffset => octaveOffset;
     public bool LevelRunning => levelRunning;
 
-    private const string OctavePrefKey = "SounApp.OctaveOffset";
-
     [Header("Tempo")]
     [Tooltip("Límite inferior de BPM que el jugador puede fijar con los botones +/-.")]
     [Range(20, 240)]
@@ -97,8 +95,9 @@ public class GameAudioManager : MonoBehaviour
         // Si hay lista de niveles, el nivel actual sale de ahí.
         ApplyCurrentLevel();
 
-        // Recupera la octava elegida por el jugador en sesiones anteriores.
-        octaveOffset = PlayerPrefs.GetInt(OctavePrefKey, octaveOffset);
+        // La octava NO se persiste: arranca con el valor por defecto del
+        // Inspector en cada sesión. El jugador la cambia libremente antes de
+        // entrenar (igual que el BPM), sin que quede guardada entre sesiones.
 
         // Tempo inicial = el del nivel de arranque. NO se lee de PlayerPrefs:
         // el jugador lo ajusta en cada sesión y no queda persistido.
@@ -112,10 +111,8 @@ public class GameAudioManager : MonoBehaviour
         if (levelRunning)
             return;
 
+        // No se persiste: vale solo para esta sesión, como el BPM.
         octaveOffset = Mathf.Clamp(octaves, -2, 3);
-
-        PlayerPrefs.SetInt(OctavePrefKey, octaveOffset);
-        PlayerPrefs.Save();
     }
 
     // Fija el tempo (BPM) vigente del juego. Se ignora durante un entrenamiento
@@ -327,13 +324,21 @@ public class GameAudioManager : MonoBehaviour
         // Enciende el popup de resultado con título, % de aciertos y errores.
         DebugAudio.Instance.ShowResult(passed, accuracy, hasNextLevel);
 
-        // El botón pasa al siguiente nivel (si pasó y existe) o reintenta.
-        DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
-
+        // Dejamos 'currentLevelIndex' apuntando al nivel que toca la próxima vez:
+        // si superó y hay siguiente, avanza; si no, queda en el mismo (reintento).
+        // Así da igual cómo se vuelva a entrenar —con el botón del panel o
+        // cerrando el panel y pulsando "Entrenar"—: siempre carga el nivel
+        // correcto según el resultado.
         if (passed && hasNextLevel)
-            DebugAudio.Instance.nextBtn.onClick.AddListener(LoadNextLevel);
-        else
-            DebugAudio.Instance.nextBtn.onClick.AddListener(RetryLevel);
+        {
+            currentLevelIndex++;
+            ApplyCurrentLevel();
+        }
+
+        // El botón del panel solo cierra el popup y vuelve a entrenar el nivel
+        // vigente (el siguiente o el mismo, según lo de arriba).
+        DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
+        DebugAudio.Instance.nextBtn.onClick.AddListener(ResumeTraining);
 
         uiManager.UnlockAll();
 
@@ -362,22 +367,11 @@ public class GameAudioManager : MonoBehaviour
         levelData = levels[currentLevelIndex];
     }
 
-    // Botón "Siguiente Nivel": avanza al próximo nivel y arranca el entrenamiento.
-    public void LoadNextLevel()
-    {
-        DebugAudio.Instance.Hide();
-
-        if (HasNextLevel())
-        {
-            currentLevelIndex++;
-            ApplyCurrentLevel();
-        }
-
-        StartTraining();
-    }
-
-    // Botón "Reintentar": vuelve a empezar el mismo nivel.
-    public void RetryLevel()
+    // Botón del panel de resultado ("Siguiente Nivel" / "Reintentar"): cierra el
+    // popup y arranca el entrenamiento del nivel vigente. EndLevel ya dejó
+    // 'currentLevelIndex' en el nivel correcto, así que no hay que decidir nada
+    // acá. Es exactamente lo mismo que cerrar el panel y pulsar "Entrenar".
+    public void ResumeTraining()
     {
         DebugAudio.Instance.Hide();
         StartTraining();
@@ -421,50 +415,31 @@ public class GameAudioManager : MonoBehaviour
         return 0;
     }
 
-    // Vuela rápido a la nota y, en paralelo, lanza el audio de referencia con un
-    // fade out que termina junto con el vuelo: así la referencia no agrega tiempo
-    // al pulso. La captura del mic sigue apagada durante esta fase.
+    // Vuela rápido a la nota y, JUSTO al llegar (el pulso de la figura), dispara
+    // el audio de referencia. El sonido NO suena durante el vuelo: arranca en el
+    // tiempo exacto en que el pájaro pisa la nota y se deja sonar normal (sin
+    // fade ni stop). No se espera a que termine, así no agrega tiempo al pulso
+    // ni a la secuencia. La captura del mic sigue apagada durante esta fase.
     IEnumerator FlyAndCue(int visualIndex, float flightTime, NoteName note)
     {
-        Coroutine cue = playReferenceBeforeNote
-            ? StartCoroutine(PlayReferenceWithFade(note, flightTime))
-            : null;
-
         yield return StartCoroutine(bird.FlyTo(visualIndex, flightTime));
 
-        // Asegura que el fade terminó y el audio se detuvo antes de evaluar.
-        if (cue != null)
-            yield return cue;
+        // El pájaro llegó a la nota: el pulso cae aquí. Disparamos la referencia
+        // en el tiempo exacto, alineada con el metrónomo / la figura.
+        if (playReferenceBeforeNote)
+            PlayReference(note);
     }
 
-    // Reproduce la referencia (p.ej. "Nota Do") transpuesta a la octava del
-    // jugador y la apaga con un fade out a lo largo de 'fadeTime', para que no
-    // coma tiempo del compás ni de la negra. Restaura pitch/volumen del source.
-    IEnumerator PlayReferenceWithFade(NoteName note, float fadeTime)
+    // Reproduce la referencia de la nota (p.ej. "Nota Do") completa y al volumen
+    // configurado en su AudioSource. No corta ni desvanece el sonido y no bloquea
+    // la secuencia: la nota empieza a evaluarse en el mismo pulso.
+    void PlayReference(NoteName note)
     {
         AudioSource source = GetReferenceSource(note);
         if (source == null)
-            yield break;
+            return;
 
-        float originalPitch = source.pitch;
-        float originalVolume = source.volume;
-
-        source.pitch = Mathf.Pow(2f, octaveOffset);
-        source.volume = originalVolume;
         source.Play();
-
-        float t = 0f;
-        while (t < fadeTime)
-        {
-            t += Time.deltaTime;
-            source.volume =
-                Mathf.Lerp(originalVolume, 0f, Mathf.Clamp01(t / fadeTime));
-            yield return null;
-        }
-
-        source.Stop();
-        source.pitch = originalPitch;
-        source.volume = originalVolume;
     }
 
     AudioSource GetReferenceSource(NoteName note)

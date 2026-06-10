@@ -30,6 +30,11 @@ public class DebugAudio : MonoBehaviour
     [Tooltip("Texto del nextBtn. Si se deja vacío, se busca en sus hijos.")]
     public TMP_Text nextBtnLabel;
 
+    [Header("Botón cerrar panel")]
+    [Tooltip("btn_closePanel: cierra el popup sin entrenar, para poder cambiar " +
+             "BPM/octava entre niveles. Asignar el botón hijo del panel.")]
+    public Button closeBtn;
+
     [Header("Errores")]
     [Tooltip("Texto donde se listan SOLO los errores del nivel.")]
     public TMP_Text text;
@@ -43,6 +48,11 @@ public class DebugAudio : MonoBehaviour
 
         if (panelPopUpResult != null)
             panelPopUpResult.SetActive(false);
+
+        // btn_closePanel: cierra el popup para dejar tocar las configuraciones
+        // (BPM / octava) entre nivel y nivel. No entrena: solo oculta el panel.
+        if (closeBtn != null)
+            closeBtn.onClick.AddListener(Hide);
     }
 
     // Agrega una línea de ERROR al scroll (solo notas falladas).

@@ -110,7 +110,7 @@ La misma melodía sirve para cualquier tipo de voz mediante un **selector de oct
 - **Voz aguda (C4–C5):** típico femenino.
 - Octavas adicionales (infantil/soprano) si se desean.
 
-El sistema **transpone todo el ejercicio** a la octava elegida sin cambiar la melodía ni los visuales: solo se desplaza la nota esperada. El **audio de referencia también se transpone automáticamente** (mediante un cambio de `pitch` exacto de una octava), por lo que no hace falta grabar clips nuevos. La elección **se recuerda entre sesiones** (PlayerPrefs).
+El sistema **transpone todo el ejercicio** a la octava elegida sin cambiar la melodía ni los visuales: solo se desplaza la nota esperada. La elección **NO se persiste**: vale solo para la sesión actual (igual que el BPM), así el jugador puede cambiarla libremente entre niveles o al reabrir la app sin arrastrar configuraciones viejas.
 
 Esto se resolvió con un selector manual —como en las apps profesionales de canto ("elegí tu registro")— por ser la opción más confiable: no depende de una detección automática que podría fallar y cubre cualquier voz, incluidas las infantiles.
 
