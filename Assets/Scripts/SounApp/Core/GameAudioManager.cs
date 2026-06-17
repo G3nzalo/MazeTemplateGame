@@ -61,12 +61,6 @@ public class GameAudioManager : MonoBehaviour
     [Tooltip("Cuánto sube/baja el BPM por cada pulsación del botón +/-.")]
     public int bpmStep = 5;
 
-    [Tooltip("Duración (segundos) de la transición de vuelo entre notas. Es una " +
-             "transición CORTA: se acota a una fracción de la negra para no romper " +
-             "el tempo en notas rápidas. El vuelo + el canto juntos duran una negra, " +
-             "así el onset de cada nota cae justo en el pulso elegido.")]
-    public float noteTransitionTime = 0.15f;
-
     // Tempo VIGENTE del juego, en memoria. Es la única fuente de verdad tanto
     // para el display como para la duración de cada nota. Se inicializa con el
     // BPM del nivel y se modifica con los botones +/-. NO se persiste (no se
@@ -139,6 +133,42 @@ public class GameAudioManager : MonoBehaviour
         StartCoroutine(LevelRoutine());
     }
 
+    // Aborta el entrenamiento EN CURSO y deja el juego en un estado limpio,
+    // listo para volver a entrenar. Lo llama el botón de pausa/stop.
+    //
+    // A diferencia de los setters de BPM/octava (que se ignoran con el nivel en
+    // curso), este método SÍ actúa durante el nivel: su razón de ser es cortarlo
+    // a mitad. Por eso NO debe depender de UIInteractionManager.CanInteract(),
+    // que está bloqueado mientras se entrena.
+    public void StopTraining()
+    {
+        if (!levelRunning)
+            return;
+
+        // Corta la secuencia completa: LevelRoutine, el planeo del pájaro
+        // (bird.FlyTo) y la evaluación de la nota (EvaluatePlayerPitch). Todas se
+        // lanzaron con StartCoroutine sobre este MonoBehaviour.
+        StopAllCoroutines();
+
+        // Cierra la captura del micrófono que pudiera haber quedado abierta.
+        if (pitchDetector != null)
+            pitchDetector.EndCapture();
+
+        levelRunning = false;
+        currentState = GameAudioState.Menu;
+
+        // Devuelve el control de la UI: LockAll() la había bloqueado al empezar.
+        if (uiManager != null)
+            uiManager.UnlockAll();
+
+        // Oculta el popup de resultado y limpia el scroll de errores.
+        if (DebugAudio.Instance != null)
+        {
+            DebugAudio.Instance.Hide();
+            DebugAudio.Instance.Clear();
+        }
+    }
+
     IEnumerator LevelRoutine()
     {
         levelRunning = true;
@@ -166,41 +196,58 @@ public class GameAudioManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
+        // Cuenta de entrada: coloca al pájaro SOBRE la primera nota tocable antes
+        // de que empiece la música (vuelo de un pulso, sin evaluar). A partir de
+        // ahí, en cada figura el pájaro YA está sobre la nota que toca cantar.
+        int firstIndex = NextPlayableIndex(0);
+        if (firstIndex >= 0)
+            yield return StartCoroutine(
+                bird.FlyTo(
+                    GetVisualIndex(levelData.notes[firstIndex]),
+                    GetDuration(levelData.notes[firstIndex].duration)));
+
         for (int i = 0; i < levelData.notes.Count; i++)
         {
             NoteEvent note =
                 levelData.notes[i];
 
+            // Los silencios no se cantan: su tiempo ya lo consume el planeo de la
+            // nota anterior, que cruza por encima de ellos hasta la próxima nota.
             if (note.isRest)
-            {
-                yield return new WaitForSeconds(
-                    GetDuration(note.duration));
-
                 continue;
-            }
-
-            int visualIndex =
-                GetVisualIndex(note);
 
             float duration =
                 GetDuration(note.duration);
 
-            // Reparto del pulso: el vuelo es una transición CORTA y el canto
-            // ocupa el resto. vuelo + canto = la negra, así el onset de cada
-            // nota cae justo en el beat y el nivel va al tempo elegido.
-            float flightTime =
-                Mathf.Min(noteTransitionTime, duration * 0.35f);
-            float singTime = duration - flightTime;
+            // El pájaro YA está sobre esta nota (llegó en el planeo anterior o en
+            // la cuenta de entrada). Disparamos su referencia justo en el pulso.
+            if (playReferenceBeforeNote)
+                PlayReference(note.note);
 
-            // Vuela rápido a la nota mientras suena la referencia con fade out
-            // (no agrega tiempo al pulso). La captura del mic sigue apagada.
-            yield return StartCoroutine(
-                FlyAndCue(visualIndex, flightTime, note.note));
+            // Próxima nota tocable y tiempo TOTAL de planeo hasta ella: la
+            // duración de ESTA figura más la de los silencios intermedios, para
+            // que el pájaro aterrice en la siguiente nota justo en su pulso.
+            int nextIndex = NextPlayableIndex(i + 1);
+            float glideTime = duration;
+            int glideEnd = nextIndex < 0 ? levelData.notes.Count : nextIndex;
+            for (int r = i + 1; r < glideEnd; r++)
+                glideTime += GetDuration(levelData.notes[r].duration);
+
+            // MOVIMIENTO MUSICAL: durante TODA la figura el pájaro planea hacia la
+            // SIGUIENTE nota (no un salto brusco al final), en paralelo con la
+            // evaluación de la nota ACTUAL. Así el jugador ve con anticipación a
+            // dónde tendrá que cantar la próxima.
+            Coroutine glide = nextIndex >= 0
+                ? StartCoroutine(
+                    bird.FlyTo(
+                        GetVisualIndex(levelData.notes[nextIndex]),
+                        glideTime))
+                : null;
 
             yield return StartCoroutine(
                 EvaluatePlayerPitch(
                     note.note,
-                    singTime));
+                    duration));
 
             bool success =
                 currentEvaluationResult;
@@ -211,6 +258,11 @@ public class GameAudioManager : MonoBehaviour
                 $"TARGET: {note.note} | " +
                 $"SUNG: {lastDetectedNote} | " +
                 $"{(success ? "OK" : "FAIL")}");
+
+            // Si entre esta nota y la próxima había silencios, esperamos a que el
+            // planeo termine de cruzarlos para no romper el compás.
+            if (glide != null)
+                yield return glide;
         }
 
         EndLevel();
@@ -249,7 +301,9 @@ public class GameAudioManager : MonoBehaviour
                 feedbackUI.ShowResult(0f, levelData.perNoteTuningPercent);
 
             // No se captó voz para esta nota = error: se lista en el scroll.
-            DebugAudio.Instance.AddError($"{targetNote} → no llegaste a esa nota.");
+            // Etiqueta esperada desde targetMidi (incluye octaveOffset) para
+            // mantener la misma referencia de octava que el resto de mensajes.
+            DebugAudio.Instance.AddError($"{MidiToNoteName(targetMidi)} → no llegaste a esa nota.");
             yield break;
         }
 
@@ -282,9 +336,14 @@ public class GameAudioManager : MonoBehaviour
         string result = currentEvaluationResult ? "OK" : "FAIL";
 
         // SCROLL DE ERRORES: solo las notas falladas.
+        // La nota esperada se etiqueta desde targetMidi (que ya incluye
+        // octaveOffset), igual que lastDetectedNote, para que ambas usen la
+        // MISMA referencia de octava. Si se imprime el enum crudo ({targetNote})
+        // la etiqueta esperada ignora octaveOffset y queda desfasada una octava
+        // respecto a la cantada (p. ej. muestra "C4 → cantaste C3").
         if (!currentEvaluationResult)
             DebugAudio.Instance.AddError(
-                $"{targetNote} → cantaste {lastDetectedNote} ({tuningPercent:F0}%)");
+                $"{MidiToNoteName(targetMidi)} → cantaste {lastDetectedNote} ({tuningPercent:F0}%)");
 
         // DEBUG CONSOLE
         Debug.Log(
@@ -415,19 +474,16 @@ public class GameAudioManager : MonoBehaviour
         return 0;
     }
 
-    // Vuela rápido a la nota y, JUSTO al llegar (el pulso de la figura), dispara
-    // el audio de referencia. El sonido NO suena durante el vuelo: arranca en el
-    // tiempo exacto en que el pájaro pisa la nota y se deja sonar normal (sin
-    // fade ni stop). No se espera a que termine, así no agrega tiempo al pulso
-    // ni a la secuencia. La captura del mic sigue apagada durante esta fase.
-    IEnumerator FlyAndCue(int visualIndex, float flightTime, NoteName note)
+    // Índice de la primera nota TOCABLE (no silencio) desde 'from' inclusive.
+    // Devuelve -1 si de ahí en adelante solo quedan silencios. Se usa para saber
+    // hacia qué nota debe planear el pájaro (saltándose los silencios del medio).
+    int NextPlayableIndex(int from)
     {
-        yield return StartCoroutine(bird.FlyTo(visualIndex, flightTime));
+        for (int i = from; i < levelData.notes.Count; i++)
+            if (!levelData.notes[i].isRest)
+                return i;
 
-        // El pájaro llegó a la nota: el pulso cae aquí. Disparamos la referencia
-        // en el tiempo exacto, alineada con el metrónomo / la figura.
-        if (playReferenceBeforeNote)
-            PlayReference(note);
+        return -1;
     }
 
     // Reproduce la referencia de la nota (p.ej. "Nota Do") completa y al volumen

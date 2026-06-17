@@ -213,7 +213,8 @@ public class TypewriterInstructions : MonoBehaviour
         if (typingCoroutine != null)
             StopCoroutine(typingCoroutine);
 
-        typingCoroutine = StartCoroutine(TypeText(slide));
+        CompleteCurrentText();
+        // typingCoroutine = StartCoroutine(TypeText(slide));
     }
 
     private IEnumerator TypeText(SlideData slide)

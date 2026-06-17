@@ -66,14 +66,20 @@ public class BirdControllerMov : MonoBehaviour
             float t =
                 time / duration;
 
+            // Easing suave (smoothstep): el pájaro acelera y desacelera en vez de
+            // ir a velocidad constante. Da un movimiento más orgánico y musical,
+            // menos "de máquina", al planear durante toda la figura.
+            float eased =
+                t * t * (3f - 2f * t);
+
             Vector3 pos =
                 Vector3.Lerp(
                     start,
                     end,
-                    t);
+                    eased);
 
             pos.y +=
-                Mathf.Sin(t * Mathf.PI)
+                Mathf.Sin(eased * Mathf.PI)
                 * arcHeight;
 
             transform.position = pos;

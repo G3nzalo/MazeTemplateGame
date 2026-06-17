@@ -3,14 +3,14 @@
     {
       "id": 1,
       "title": "",
-      "text": "Instrucciones!",
+      "text": "Leer Instrucciones!",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 2,
       "title": "",
-      "text": "Esta app está diseñada para ayudarte a entrenar tu oído musical.\n\nEtapa 1: Modo Mayor diatónico\nEtapa 2: Modo menor diatónico\nEtapa 3: Modo mayor + modo menor\nEtapa 4: Modo mayor con alteraciones\nEtapa 5: Modo menor con alteraciones.",
+      "text": "Esta app está diseñada para ayudarte \na entrenar tu oído musical.\n\nEtapa 1: Modo Mayor diatónico\nEtapa 2: Modo menor diatónico\nEtapa 3: Modo mayor + modo menor\nEtapa 4: Modo mayor con alteraciones\nEtapa 5: Modo menor con alteraciones.",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
@@ -38,19 +38,33 @@
     {
       "id": 6,
       "title": "",
-      "text": "1) Elegí la octava en la que vas a cantar no saltar este paso:\n\nSopranos, mezzos, altos → octava 4 (central)\nTenores, barítonos y bajos → octava 3\n\n Importante seleccionar la octava correcta\n\n2) Cantá la escala. Tenés tres botones para reproducir la escala, la tónica y su correspondiente acorde, para escuchar previamente según tu preferencia.",
+      "text": "1) Elegí la octava en la que vas a cantar no saltar este paso:\n\nSopranos, mezzos, altos → octava 4 (central)\nTenores, barítonos y bajos → octava 3\n\n Importante seleccionar la octava correcta",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
-    {
+      {
       "id": 7,
       "title": "",
-      "text": "3) Click al botón Comenzar:\nEl pajarito irá señalando las distintas notas, formando fragmentos melódicos.\n\n Trabajá cantar ligando notas y formando frases. ¡No son notas sueltas!\n Cada vez que suene, escuchá el acorde de tónica para acomodar la afinación.\n No olvides respirar, aprovechá los breves instantes en que el pajarito se detiene.\n\n4) Podés regular la velocidad desde el botón Tempo antes de comenzar.",
+      "text": "2) Cantá la escala. Tenés tres botones para reproducir la escala, la tónica y su correspondiente acorde, para escuchar previamente según tu preferencia.",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 8,
+      "title": "",
+      "text": "3) Click al botón Comenzar:\nEl pajarito irá señalando las distintas notas, formando fragmentos melódicos.\n\n Trabajá cantar ligando notas y formando frases. ¡No son notas sueltas!\n Cada vez que suene, escuchá el acorde de tónica \npara acomodar la afinación.\n No olvides respirar,\n aprovechá los breves instantes en que el pajarito se detiene.",
+      "typingSpeed": 0.04,
+      "pauseAfterPunctuation": 0.3
+    },
+    {
+      "id": 9,
+      "title": "",
+      "text": "4) Podés regular la velocidad desde el botón Tempo antes de comenzar.",
+      "typingSpeed": 0.04,
+      "pauseAfterPunctuation": 0.3
+    },
+    {
+      "id": 10,
       "title": "",
       "text": "¡Al finalizar tendrás el resultado!\n\nEl nivel se considera superado si cantaste el 85% de lo propuesto correctamente, pasando así al siguiente.\n\nTambién podrás observar el registro de las notas erradas, así como también las que tuvieron cierto margen de error en la afinación. Esto te permitirá saber cuáles son las que podés trabajar más.",
       "typingSpeed": 0.04,
