@@ -1,0 +1,60 @@
+{
+    "slides": [
+        {
+            "id": 1,
+            "title": "Nivel 1",
+            "text": "<u>Misión:</u> Incorporar la escala y sus parciales. Importante: conectar con la sensación de reposo cada vez que cantás la tónica.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 2,
+            "title": "Nivel 2",
+            "text": "<u>Misión:</u> Incorporar la escala y sus parciales.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 3,
+            "title": "Nivel 3",
+            "text": "<u>Misión:</u> Entrenar la repetición de notas. Recordá conectar con la sensación de reposo cada vez que cantás la tónica.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 4,
+            "title": "Nivel 4",
+            "text": "<u>Misión:</u> Entrenar la repetición de notas.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 5,
+            "title": "Nivel 5",
+            "text": "<u>Misión:</u> Entrenar el movimiento por grado conjunto ascendente y descendente. No olvides conectar con la sensación de reposo cada vez que cantás la tónica.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 6,
+            "title": "Nivel 6",
+            "text": "<u>Misión:</u> Entrenar el movimiento por grado conjunto ascendente y descendente",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },
+        {
+            "id": 7,
+            "title": "Nivel 7",
+            "text": "<u>Misión:</u> Entrenar el movimiento por grado conjunto ascendente y descendente. No olvides conectar con la sensación de reposo cada vez que cantás la tónica.",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        },        
+        {
+            "id": 8,
+            "title": "Nivel 8",
+            "text": "<u>Misión:</u> Entrenar el movimiento por grado conjunto ascendente y descendente",
+            "typingSpeed": 0.04,
+            "pauseAfterPunctuation": 0.3
+        }
+    ]
+}

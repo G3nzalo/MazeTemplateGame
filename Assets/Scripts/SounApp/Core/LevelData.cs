@@ -5,7 +5,8 @@ using UnityEngine;
 public class LevelData : ScriptableObject
 {
     public int bpm = 77;
-
+    public int levelID = 0; 
+    
     public List<NoteEvent> notes;
 
     [Header("Difficulty")]

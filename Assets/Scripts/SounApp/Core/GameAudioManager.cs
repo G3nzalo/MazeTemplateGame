@@ -49,6 +49,14 @@ public class GameAudioManager : MonoBehaviour
     public int OctaveOffset => octaveOffset;
     public bool LevelRunning => levelRunning;
 
+    // levelID del nivel vigente. Hace match con el "id" de level_data.json para
+    // elegir el texto del popup informativo (ver LevelInstructions.ShowForLevel).
+    public int CurrentLevelID => levelData != null ? levelData.levelID : 0;
+
+    [Header("Popup informativo de nivel")]
+    [Tooltip("Popup que se muestra al inicio de cada nivel con la misión del mismo.")]
+    public LevelInstructions levelInstructions;
+
     [Header("Tempo")]
     [Tooltip("Límite inferior de BPM que el jugador puede fijar con los botones +/-.")]
     [Range(20, 240)]
@@ -75,6 +83,14 @@ public class GameAudioManager : MonoBehaviour
 
     [Header("State")]
     public GameAudioState currentState;
+
+    [Header("Debug")]
+    [Tooltip("Modo prueba: permite SALTEAR el gameplay para testear los popups de " +
+             "resultado e informativos end-to-end, sin tener que cantar.\n" +
+             "Teclas en el editor (con debugMode activo y sin nivel en curso):\n" +
+             "  P = completar el nivel como SUPERADO\n" +
+             "  F = completar el nivel como NO superado")]
+    public bool debugMode = false;
 
     private bool levelRunning;
 
@@ -131,6 +147,50 @@ public class GameAudioManager : MonoBehaviour
             return;
 
         StartCoroutine(LevelRoutine());
+    }
+
+    private void Update()
+    {
+        if (!debugMode || levelRunning)
+            return;
+
+        // Atajos para testear los popups sin jugar el nivel.
+        if (Input.GetKeyDown(KeyCode.P))
+            DebugFinishLevel(true);
+        else if (Input.GetKeyDown(KeyCode.F))
+            DebugFinishLevel(false);
+    }
+
+    // DEBUG: completa el nivel actual con un resultado forzado (superado o no),
+    // sin jugarlo, y dispara el flujo normal de fin de nivel (popup de resultado
+    // y, si corresponde, popup informativo del siguiente). Útil para recorrer
+    // todos los popups end-to-end. También se puede enganchar a botones de debug.
+    public void DebugPassLevel() => DebugFinishLevel(true);
+    public void DebugFailLevel() => DebugFinishLevel(false);
+
+    private void DebugFinishLevel(bool passed)
+    {
+        if (levelRunning || levelData == null)
+            return;
+
+        // Simula el puntaje para que EndLevel calcule el resultado deseado.
+        int total = (levelData.notes != null && levelData.notes.Count > 0)
+            ? levelData.notes.Count
+            : 10;
+
+        scoreSystem.totalNotes = total;
+        scoreSystem.correctNotes = passed ? total : 0;
+
+        if (DebugAudio.Instance != null)
+        {
+            DebugAudio.Instance.Clear();
+            if (!passed)
+                DebugAudio.Instance.AddError("[DEBUG] Nivel marcado como NO superado.");
+        }
+
+        Debug.Log($"[DEBUG] Completando nivel {CurrentLevelID} como {(passed ? "SUPERADO" : "NO superado")}.");
+
+        EndLevel();
     }
 
     // Aborta el entrenamiento EN CURSO y deja el juego en un estado limpio,
@@ -392,16 +452,55 @@ public class GameAudioManager : MonoBehaviour
         {
             currentLevelIndex++;
             ApplyCurrentLevel();
+
+            // SUPERÓ el nivel: al cerrar el popup de resultado (botón Siguiente o
+            // cerrar) NO entrenamos directo, sino que mostramos el popup
+            // informativo del NUEVO nivel. El jugador lo lee, lo cierra y arranca
+            // cuando pulsa "Entrenar".
+            DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
+            DebugAudio.Instance.nextBtn.onClick.AddListener(ShowNextLevelInfo);
+
+            DebugAudio.Instance.closeBtn.onClick.RemoveAllListeners();
+            DebugAudio.Instance.closeBtn.onClick.AddListener(ShowNextLevelInfo);
+        }
+        else
+        {
+            // NO superó (o no hay siguiente nivel): se reintenta el MISMO nivel
+            // como antes, sin mostrar el popup informativo de nuevo.
+            DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
+            DebugAudio.Instance.nextBtn.onClick.AddListener(ResumeTraining);
+
+            // Restaura el cierre normal del popup (por si quedó enganchado a
+            // ShowNextLevelInfo de un nivel superado anterior).
+            DebugAudio.Instance.closeBtn.onClick.RemoveAllListeners();
+            DebugAudio.Instance.closeBtn.onClick.AddListener(DebugAudio.Instance.Hide);
         }
 
-        // El botón del panel solo cierra el popup y vuelve a entrenar el nivel
-        // vigente (el siguiente o el mismo, según lo de arriba).
-        DebugAudio.Instance.nextBtn.onClick.RemoveAllListeners();
-        DebugAudio.Instance.nextBtn.onClick.AddListener(ResumeTraining);
-
-        uiManager.UnlockAll();
-
+        // NO se desbloquea la UI acá: el popup de resultado queda abierto y sus
+        // botones de atrás deben seguir inactivos. El control se devuelve al
+        // cerrar el popup (DebugAudio.Hide) o al arrancar el próximo flujo
+        // (ResumeTraining → StartTraining, o el popup informativo del nuevo nivel).
         levelRunning = false;
+    }
+
+    // Muestra el popup informativo del nivel vigente (su misión), eligiendo el
+    // texto por el levelID en level_data.json. Lo usan los tutoriales (Nivel 1)
+    // y el cierre del popup de resultado tras superar un nivel (Niveles 2..8).
+    public void ShowCurrentLevelInfo()
+    {
+        LevelInstructions panel = levelInstructions != null
+            ? levelInstructions
+            : LevelInstructions.Instance;
+
+        if (panel != null)
+            panel.ShowForLevel(CurrentLevelID);
+    }
+
+    // Cierra el popup de resultado y abre el informativo del nuevo nivel.
+    void ShowNextLevelInfo()
+    {
+        DebugAudio.Instance.Hide();
+        ShowCurrentLevelInfo();
     }
 
     // ¿Existe un nivel posterior al actual en la lista?

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Level1_e
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   bpm: 75
+  levelID: 5
   notes:
   - isRest: 0
     note: 0

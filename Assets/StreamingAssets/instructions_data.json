@@ -17,42 +17,42 @@
     {
       "id": 3,
       "title": "",
-      "text": "El sistema tonal se basa en movimientos de tensión y reposo.\n\nCada escala define un ámbito de pertenencia que nuestro oído registra, dentro del cual podemos permanecer mientras cantamos.\n\nEste ámbito interno se puede construir, reforzar y consolidar a través del entrenamiento. Este es el principal objetivo de esta app.",
+      "text": "El sistema tonal se basa en movimientos de tensión y reposo.\n\nCada escala define un ámbito de pertenencia que nuestro oído registra, dentro del cual podemos permanecer mientras cantamos.\n\nEste ámbito interno se puede construir, desarrollar y consolidar a través del entrenamiento. Este es el principal objetivo de esta app.",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 4,
       "title": "",
-      "text": "Dentro de la escala, cada nota posee una distancia diferente con la tónica, lo que marca distintas tensiones dando una sensación única para cada nota.\n\nLa tensión que poseen las notas distintas a la tónica es diferente para cada uno de los grados del conjunto.",
+      "text": "Dentro de una escala, cada nota posee una relación diferente hacia la tónica, resultando en una tensión, sensación y color únicos para cada grado.",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 5,
       "title": "",
-      "text": "Cada nivel te va a proponer una misión al comienzo. Es importante que trabajes esa propuesta mientras cantás.\n\nTu primer objetivo será diferenciar la sensación de reposo y la de tensión.",
+      "text": "Cada nivel te va a proponer una misión al comienzo.\n Es importante que trabajes esa propuesta mientras cantás.\n\nTu primer objetivo será diferenciar la sensación \nde reposo (tónica) y la de tensión (resto de las notas).",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 6,
       "title": "",
-      "text": "1) Elegí la octava en la que vas a cantar no saltar este paso:\n\nSopranos, mezzos, altos → octava 4 (central)\nTenores, barítonos y bajos → octava 3\n\n Importante seleccionar la octava correcta",
+      "text": "1) Elegí la octava en la que vas a cantar. ¡NO saltar este paso!\n\nSopranos, mezzos, altos → octava 4 (central)\nTenores, barítonos y bajos → octava 3\n\n ¡Importante seleccionar la octava correcta!",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
       {
       "id": 7,
       "title": "",
-      "text": "2) Cantá la escala. Tenés tres botones para reproducir la escala, la tónica y su correspondiente acorde, para escuchar previamente según tu preferencia.",
+      "text": "2) Cantá la escala antes de hacer clic en “Entrenar”. Tenés tres botones para escuchar previamente según tu preferencia: \nAcorde / Tónica / Escala",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
     {
       "id": 8,
       "title": "",
-      "text": "3) Click al botón Comenzar:\nEl pajarito irá señalando las distintas notas, formando fragmentos melódicos.\n\n Trabajá cantar ligando notas y formando frases. ¡No son notas sueltas!\n Cada vez que suene, escuchá el acorde de tónica \npara acomodar la afinación.\n No olvides respirar,\n aprovechá los breves instantes en que el pajarito se detiene.",
+      "text": "3) Click al botón Comenzar:\nEl pajarito irá señalando las distintas notas, formando fragmentos melódicos.\n\n Trabajá cantar ligando notas y formando frases. ¡No son notas sueltas!\n Cantá escuchando la armonía que suena para acomodar la afinación.\n¡No olvides respirar!\n Aprovechá los breves instantes en que el pajarito se detiene.",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     },
@@ -66,7 +66,14 @@
     {
       "id": 10,
       "title": "",
-      "text": "¡Al finalizar tendrás el resultado!\n\nEl nivel se considera superado si cantaste el 85% de lo propuesto correctamente, pasando así al siguiente.\n\nTambién podrás observar el registro de las notas erradas, así como también las que tuvieron cierto margen de error en la afinación. Esto te permitirá saber cuáles son las que podés trabajar más.",
+      "text": "La app requiere el uso de auriculares. Los más recomendados son los que funcionan con cable conectados al teléfono y sin micrófono. Los auriculares bluetooth suelen generar una latencia que interfiere con la fluidez del entrenamiento, por lo tanto, si podés evitarlos tendrás una mejor experiencia previniendo errores innecesarios.",
+      "typingSpeed": 0.04,
+      "pauseAfterPunctuation": 0.3
+    },
+    {
+      "id": 11,
+      "title": "",
+      "text": "¡Al finalizar tendrás el resultado!\n\nEl nivel se considera superado si cantaste el 80% de lo propuesto correctamente, pasando así al siguiente.\n\nPodrás observar el registro de las notas erradas. Por ejemplo: D4 cantaste D4 (40%) >> significa que se mantuvo la afinación de la nota tan solo un 40% del pulso",
       "typingSpeed": 0.04,
       "pauseAfterPunctuation": 0.3
     }

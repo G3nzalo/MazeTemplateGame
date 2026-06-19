@@ -74,6 +74,12 @@ public class DebugAudio : MonoBehaviour
         if (panelPopUpResult != null)
             panelPopUpResult.SetActive(true);
 
+        // Con el popup de resultado abierto, bloquea los botones del juego que
+        // quedan por detrás para que no se pulsen sin querer (p. ej. "Entrenar").
+        // Se reactivan al cerrar el popup (ver Hide).
+        if (UIInteractionManager.Instance != null)
+            UIInteractionManager.Instance.LockAll();
+
         if (title_txt != null)
             title_txt.text = passed
                 ? "Superaste el nivel!"
@@ -99,6 +105,12 @@ public class DebugAudio : MonoBehaviour
     {
         if (panelPopUpResult != null)
             panelPopUpResult.SetActive(false);
+
+        // Devuelve el control de la UI al cerrar el popup. Si justo después se
+        // arranca un entrenamiento o se abre el popup informativo, esos flujos
+        // vuelven a bloquearla.
+        if (UIInteractionManager.Instance != null)
+            UIInteractionManager.Instance.UnlockAll();
     }
 
     private TMP_Text NextButtonLabel()

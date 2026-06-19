@@ -24,26 +24,7 @@ using TMPro;
 /// </summary>
 public class TypewriterInstructions : MonoBehaviour
 {
-    // ─── Clases de datos ────────────────────────────────────────────────────
-
-    [Serializable]
-    private class SlideData
-    {
-        public int    id;
-        public string title;
-        public string text;
-        public float  typingSpeed            = 0.04f;
-        public float  pauseAfterPunctuation  = 0.3f;
-    }
-
-    [Serializable]
-    private class SlidesRoot
-    {
-        public List<SlideData> slides;
-    }
-
     // ─── Referencias UI ─────────────────────────────────────────────────────
-
     [Header("Referencias UI")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI bodyText;
@@ -318,9 +299,11 @@ public class TypewriterInstructions : MonoBehaviour
         Debug.Log("[Typewriter] Instrucciones completadas.");
         ShowPanel(false);
 
-        // Descomentá lo que necesites:
-        // UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
-        // OnInstructionsCompleted?.Invoke();
+        // Al terminar los tutoriales del inicio, encadenamos el popup informativo
+        // del primer nivel (Nivel 1). GameAudioManager sabe cuál es el nivel
+        // vigente y qué levelID le corresponde.
+        if (GameAudioManager.Instance != null)
+            GameAudioManager.Instance.ShowCurrentLevelInfo();
     }
 
     // ─── Estado de botones ────────────────────────────────────────────────────
